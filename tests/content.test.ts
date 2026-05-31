@@ -262,4 +262,62 @@ describe("content script", () => {
 
     expect(sendMessage).toHaveBeenCalledTimes(1);
   });
+
+  it("hides the card when a Twitter post button inside the composer is clicked", async () => {
+    const sendMessage = vi.fn().mockResolvedValue({ ok: true, translation: "Hello" });
+    vi.stubGlobal("chrome", {
+      runtime: { sendMessage },
+      storage: {
+        sync: {
+          get: vi.fn().mockResolvedValue({ ...DEFAULT_SETTINGS, idleMs: 250 }),
+          set: vi.fn()
+        },
+        onChanged: { addListener: vi.fn() }
+      }
+    });
+
+    await import("../src/content");
+    await Promise.resolve();
+    await Promise.resolve();
+
+    document.body.innerHTML = `
+      <div id="composer" role="textbox" aria-label="Post text">
+        <span id="child">hello</span>
+        <button data-testid="tweetButtonInline"></button>
+      </div>
+    `;
+
+    const composer = document.getElementById("composer") as HTMLElement;
+    composer.getBoundingClientRect = () =>
+      ({
+        bottom: 120,
+        height: 44,
+        left: 20,
+        right: 520,
+        top: 76,
+        width: 500,
+        x: 20,
+        y: 76,
+        toJSON: () => ({})
+      }) as DOMRect;
+
+    const childText = document.getElementById("child")?.firstChild as Text;
+    const range = document.createRange();
+    range.setStart(childText, 5);
+    range.collapse(true);
+    document.getSelection()?.removeAllRanges();
+    document.getSelection()?.addRange(range);
+    document.dispatchEvent(new Event("selectionchange"));
+
+    await vi.advanceTimersByTimeAsync(250);
+    await Promise.resolve();
+
+    const host = document.getElementById("write-first-translation-card-host") as HTMLDivElement;
+    expect(host.hidden).toBe(false);
+
+    const button = document.querySelector("[data-testid='tweetButtonInline']") as HTMLButtonElement;
+    button.dispatchEvent(new Event("click", { bubbles: true }));
+
+    expect(host.hidden).toBe(true);
+  });
 });

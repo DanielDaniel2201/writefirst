@@ -47,6 +47,8 @@ function registerListeners(): () => void {
   document.addEventListener("input", handleInput, true);
   document.addEventListener("keyup", handleKeyUp, true);
   document.addEventListener("pointerdown", handlePointerDown, true);
+  document.addEventListener("mousedown", handlePointerDown, true);
+  document.addEventListener("click", handlePointerDown, true);
   document.addEventListener("compositionstart", handleCompositionStart, true);
   document.addEventListener("compositionend", handleCompositionEnd, true);
   document.addEventListener("selectionchange", handleSelectionChange, true);
@@ -95,6 +97,8 @@ function registerListeners(): () => void {
     document.removeEventListener("input", handleInput, true);
     document.removeEventListener("keyup", handleKeyUp, true);
     document.removeEventListener("pointerdown", handlePointerDown, true);
+    document.removeEventListener("mousedown", handlePointerDown, true);
+    document.removeEventListener("click", handlePointerDown, true);
     document.removeEventListener("compositionstart", handleCompositionStart, true);
     document.removeEventListener("compositionend", handleCompositionEnd, true);
     document.removeEventListener("selectionchange", handleSelectionChange, true);
@@ -141,7 +145,14 @@ function handleFocusOut(event: FocusEvent): void {
   }
 }
 
-function handlePointerDown(event: PointerEvent): void {
+function handlePointerDown(event: Event): void {
+  if (isPublishAction(event.target)) {
+    clearPending();
+    hideCardAndInvalidate();
+    activeEditable = null;
+    return;
+  }
+
   if (!activeEditable || !(event.target instanceof Node) || activeEditable.contains(event.target)) {
     return;
   }
@@ -312,6 +323,7 @@ function refreshEditableFromCurrentContext(target: EventTarget | null): void {
 
 function handleDocumentMutation(): void {
   if (!activeEditable) {
+    card.hide();
     return;
   }
 
@@ -332,6 +344,43 @@ function handleDocumentMutation(): void {
 
 function isDocumentShell(target: EventTarget | null): boolean {
   return target === document.body || target === document.documentElement;
+}
+
+function isPublishAction(target: EventTarget | null): boolean {
+  const element = eventTargetToElement(target);
+  const action = element?.closest<HTMLElement>(
+    'button, [role="button"], [data-testid="tweetButton"], [data-testid="tweetButtonInline"]'
+  );
+
+  if (!action) {
+    return false;
+  }
+
+  const testId = action.getAttribute("data-testid");
+  if (testId === "tweetButton" || testId === "tweetButtonInline") {
+    return true;
+  }
+
+  const label = [
+    action.getAttribute("aria-label"),
+    action.getAttribute("data-testid"),
+    action.getAttribute("title"),
+    action.textContent
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .trim()
+    .toLowerCase();
+
+  return /post|tweet|reply/.test(label);
+}
+
+function eventTargetToElement(target: EventTarget | null): Element | null {
+  if (target instanceof Element) {
+    return target;
+  }
+
+  return target instanceof Text ? target.parentElement : null;
 }
 
 function showFailureIfCurrent(id: number, element: EditableElement, text: string, message: string): void {
