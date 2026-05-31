@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Write First</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Write First</h1>
+        <label class="switch">
+          <input id="enabled" type="checkbox" />
+          <span>Enabled</span>
+        </label>
+      </header>
+
+      <form id="settings-form">
+        <label>
+          Native language
+          <input id="sourceLanguage" name="sourceLanguage" autocomplete="off" />
+        </label>
+
+        <label>
+          Target language
+          <input id="targetLanguage" name="targetLanguage" autocomplete="off" />
+        </label>
+
+        <label>
+          API base URL
+          <input id="baseUrl" name="baseUrl" inputmode="url" autocomplete="off" />
+        </label>
+
+        <label>
+          Model
+          <input id="model" name="model" autocomplete="off" />
+        </label>
+
+        <label>
+          API key
+          <input id="apiKey" name="apiKey" type="password" autocomplete="off" />
+        </label>
+
+        <button type="submit">Save</button>
+      </form>
+
+      <p id="status" role="status" aria-live="polite"></p>
+    </main>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
