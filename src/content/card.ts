@@ -10,6 +10,11 @@ const MIN_CARD_WIDTH = 220;
 const DEFAULT_CARD_WIDTH = 260;
 const MAX_CARD_WIDTH = 520;
 const VIEWPORT_PADDING = 12;
+const SHORT_TEXT_VISIBLE_CHARS = 24;
+const SHORT_TEXT_HIDE_DELAY_MS = 1000;
+const LONG_TEXT_HIDE_DELAY_MS = 3000;
+const FADE_OUT_MS = 180;
+const HOVER_RECHECK_MS = 120;
 
 type CardTone = "translation" | "error" | "loading";
 
@@ -19,10 +24,19 @@ export class TranslationCard {
   private content: HTMLDivElement | null = null;
   private anchor: EditableElement | null = null;
   private rafId = 0;
+  private hideTimeoutId = 0;
+  private fadeTimeoutId = 0;
+  private hoverPollTimeoutId = 0;
+  private isHovered = false;
+  private currentTone: CardTone = "translation";
+  private autoHideDelay = 0;
 
   show(anchor: EditableElement, translation: string, tone: CardTone = "translation"): void {
     this.ensure();
+    this.cancelHideTimers();
     this.anchor = anchor;
+    this.currentTone = tone;
+    this.autoHideDelay = tone === "loading" ? 0 : resolveAutoHideDelay(translation, tone);
 
     if (!this.host || !this.content) {
       return;
@@ -30,14 +44,19 @@ export class TranslationCard {
 
     this.content.textContent = translation;
     this.content.className = `card card--${tone}`;
+    this.content.classList.add("card--visible");
     this.host.hidden = false;
     this.position();
+    this.scheduleAutoHide();
   }
 
   hide(): void {
+    this.cancelHideTimers();
     this.anchor = null;
+    this.isHovered = false;
 
-    if (this.host) {
+    if (this.host && this.content) {
+      this.content.classList.remove("card--visible");
       this.host.hidden = true;
     }
   }
@@ -54,11 +73,13 @@ export class TranslationCard {
   }
 
   remove(): void {
+    this.cancelHideTimers();
     this.host?.remove();
     this.host = null;
     this.shadow = null;
     this.content = null;
     this.anchor = null;
+    this.isHovered = false;
   }
 
   private ensure(): void {
@@ -72,7 +93,7 @@ export class TranslationCard {
     this.host.hidden = true;
     this.host.style.position = "absolute";
     this.host.style.zIndex = "2147483647";
-    this.host.style.pointerEvents = "none";
+    this.host.style.pointerEvents = "auto";
 
     if (!host) {
       document.documentElement.append(this.host);
@@ -103,6 +124,14 @@ export class TranslationCard {
         line-height: 1.45;
         overflow-wrap: anywhere;
         white-space: pre-wrap;
+        opacity: 0;
+        transform: translateY(4px);
+        transition: opacity 180ms ease, transform 180ms ease;
+      }
+
+      .card--visible {
+        opacity: 1;
+        transform: translateY(0);
       }
 
       .card--error {
@@ -118,6 +147,8 @@ export class TranslationCard {
 
     this.content = document.createElement("div");
     this.content.className = "card";
+    this.content.addEventListener("mouseenter", this.handleMouseEnter);
+    this.content.addEventListener("mouseleave", this.handleMouseLeave);
     this.shadow.append(style, this.content);
   }
 
@@ -168,4 +199,110 @@ export class TranslationCard {
     const measuredHeight = this.content.getBoundingClientRect().height || this.content.scrollHeight;
     return Math.min(maxHeight, measuredHeight || FALLBACK_CARD_HEIGHT);
   }
+
+  private scheduleAutoHide(): void {
+    if (!this.autoHideDelay) {
+      return;
+    }
+
+    this.hideTimeoutId = window.setTimeout(() => {
+      this.hideTimeoutId = 0;
+
+      if (this.isPointerInsideCard()) {
+        this.isHovered = true;
+        this.startHoverPolling();
+        return;
+      }
+
+      this.beginFadeOut();
+    }, this.autoHideDelay);
+  }
+
+  private beginFadeOut(): void {
+    if (!this.host || !this.content || this.host.hidden) {
+      return;
+    }
+
+    this.content.classList.remove("card--visible");
+    this.fadeTimeoutId = window.setTimeout(() => {
+      this.fadeTimeoutId = 0;
+
+      if (this.host) {
+        this.host.hidden = true;
+      }
+    }, FADE_OUT_MS);
+  }
+
+  private cancelHideTimers(): void {
+    if (this.hideTimeoutId) {
+      window.clearTimeout(this.hideTimeoutId);
+      this.hideTimeoutId = 0;
+    }
+
+    if (this.fadeTimeoutId) {
+      window.clearTimeout(this.fadeTimeoutId);
+      this.fadeTimeoutId = 0;
+    }
+
+    if (this.hoverPollTimeoutId) {
+      window.clearTimeout(this.hoverPollTimeoutId);
+      this.hoverPollTimeoutId = 0;
+    }
+  }
+
+  private readonly handleMouseEnter = (): void => {
+    this.isHovered = true;
+    this.cancelHideTimers();
+    this.content?.classList.add("card--visible");
+  };
+
+  private readonly handleMouseLeave = (): void => {
+    this.isHovered = false;
+    this.stopHoverPolling();
+
+    if (this.currentTone !== "loading") {
+      this.scheduleAutoHide();
+    }
+  };
+
+  private startHoverPolling(): void {
+    if (this.hoverPollTimeoutId) {
+      return;
+    }
+
+    this.hoverPollTimeoutId = window.setTimeout(() => {
+      this.hoverPollTimeoutId = 0;
+
+      if (this.isPointerInsideCard()) {
+        this.startHoverPolling();
+        return;
+      }
+
+      this.isHovered = false;
+
+      if (this.currentTone !== "loading") {
+        this.scheduleAutoHide();
+      }
+    }, HOVER_RECHECK_MS);
+  }
+
+  private stopHoverPolling(): void {
+    if (this.hoverPollTimeoutId) {
+      window.clearTimeout(this.hoverPollTimeoutId);
+      this.hoverPollTimeoutId = 0;
+    }
+  }
+
+  private isPointerInsideCard(): boolean {
+    return Boolean(this.host?.matches(":hover") || this.content?.matches(":hover"));
+  }
+}
+
+function resolveAutoHideDelay(text: string, tone: CardTone): number {
+  if (tone === "error") {
+    return LONG_TEXT_HIDE_DELAY_MS;
+  }
+
+  const visibleChars = Array.from(text.replace(/\s+/g, "")).length;
+  return visibleChars <= SHORT_TEXT_VISIBLE_CHARS ? SHORT_TEXT_HIDE_DELAY_MS : LONG_TEXT_HIDE_DELAY_MS;
 }

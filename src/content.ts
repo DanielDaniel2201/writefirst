@@ -17,18 +17,22 @@ type CleanupGlobal = typeof globalThis & {
 };
 
 const card = new TranslationCard();
+const VISIBILITY_ATTRIBUTE_FILTER = ["aria-hidden", "aria-disabled", "aria-readonly", "class", "hidden", "style"];
 
 let settings: ExtensionSettings = DEFAULT_SETTINGS;
 let activeEditable: EditableElement | null = null;
 let debounceId = 0;
 let requestId = 0;
 let isComposing = false;
+let visibilityObserver: MutationObserver | null = null;
 let lastScheduledText = "";
 let lastScheduledElement: EditableElement | null = null;
 let lastRequestedText = "";
 let lastRequestedElement: EditableElement | null = null;
 let lastCompletedText = "";
 let lastCompletedElement: EditableElement | null = null;
+let lastPublishedText = "";
+let lastPublishedElement: EditableElement | null = null;
 
 void init();
 
@@ -106,6 +110,8 @@ function registerListeners(): () => void {
     window.removeEventListener("resize", handleViewportChange, true);
     chrome.storage.onChanged.removeListener?.(handleStorageChange);
     observer.disconnect();
+    visibilityObserver?.disconnect();
+    visibilityObserver = null;
     clearPending();
     card.remove();
   };
@@ -117,39 +123,52 @@ function handleFocusIn(event: FocusEvent): void {
 
   if (!nextEditable) {
     if (!isDocumentShell(event.target)) {
-      activeEditable = null;
+      setActiveEditable(null);
       clearPending();
       hideCardAndInvalidate();
     }
     return;
   }
 
-  activeEditable = nextEditable;
+  setActiveEditable(nextEditable);
 
   if (!isComposing) {
-    scheduleTranslation(activeEditable);
+    scheduleTranslation(nextEditable);
   }
 }
 
 function handleFocusOut(event: FocusEvent): void {
   if (activeEditable && event.target instanceof Node && activeEditable.contains(event.target)) {
     window.setTimeout(() => {
-      const nextEditable = resolveActiveEditableTarget();
+      const currentEditable = resolveActiveEditableTarget() ?? resolveSelectionEditableTarget();
 
-      if (nextEditable && nextEditable !== activeEditable) {
-        clearPending();
-        hideCardAndInvalidate();
-        activeEditable = null;
+      if (activeEditable && currentEditable && currentEditable !== activeEditable) {
+        clearActiveEditableState();
+        return;
+      }
+
+      if (
+        activeEditable &&
+        (!activeEditable.isConnected ||
+          !isEligibleEditableElement(activeEditable) ||
+          !hasRenderableEditableBox(activeEditable))
+      ) {
+        clearActiveEditableState();
       }
     }, 0);
   }
 }
 
 function handlePointerDown(event: Event): void {
+  if (isTranslationCardTarget(event.target)) {
+    return;
+  }
+
   if (isPublishAction(event.target)) {
+    suppressPublishedText(resolveEventEditableTarget(event.target) ?? activeEditable);
     clearPending();
     hideCardAndInvalidate();
-    activeEditable = null;
+    setActiveEditable(null);
     return;
   }
 
@@ -159,7 +178,7 @@ function handlePointerDown(event: Event): void {
 
   clearPending();
   hideCardAndInvalidate();
-  activeEditable = null;
+  setActiveEditable(null);
 }
 
 function handleCompositionStart(event: CompositionEvent): void {
@@ -175,7 +194,7 @@ function handleCompositionEnd(event: CompositionEvent): void {
   isComposing = false;
 
   if (target && isEligibleEditableElement(target)) {
-    activeEditable = target;
+    setActiveEditable(target);
     scheduleTranslation(target);
   }
 }
@@ -192,11 +211,11 @@ function handleInput(event: Event): void {
   if (!isEligibleEditableElement(target)) {
     clearPending();
     hideCardAndInvalidate();
-    activeEditable = null;
+    setActiveEditable(null);
     return;
   }
 
-  activeEditable = target;
+  setActiveEditable(target);
   hideCardAndInvalidate();
 
   if (!isComposing) {
@@ -230,6 +249,10 @@ function scheduleTranslation(element: EditableElement): void {
   }
 
   const text = getEditableText(element).trim();
+  if (shouldSuppressPublishedText(element, text)) {
+    return;
+  }
+
   if (!hasMinimumVisibleChars(text, settings.minChars)) {
     return;
   }
@@ -317,22 +340,26 @@ function refreshEditableFromCurrentContext(target: EventTarget | null): void {
     return;
   }
 
-  activeEditable = editable;
+  setActiveEditable(editable);
   scheduleTranslation(editable);
 }
 
 function handleDocumentMutation(): void {
   if (!activeEditable) {
-    card.hide();
     return;
   }
 
   if (!activeEditable.isConnected || !isEligibleEditableElement(activeEditable)) {
-    clearPending();
-    hideCardAndInvalidate();
-    activeEditable = null;
+    clearActiveEditableState();
     return;
   }
+
+  if (!hasRenderableEditableBox(activeEditable)) {
+    clearActiveEditableState();
+    return;
+  }
+
+  syncActiveEditableVisibilityObservation();
 
   const currentText = getEditableText(activeEditable).trim();
 
@@ -383,6 +410,11 @@ function eventTargetToElement(target: EventTarget | null): Element | null {
   return target instanceof Text ? target.parentElement : null;
 }
 
+function isTranslationCardTarget(target: EventTarget | null): boolean {
+  const element = eventTargetToElement(target);
+  return element?.id === "write-first-translation-card-host";
+}
+
 function showFailureIfCurrent(id: number, element: EditableElement, text: string, message: string): void {
   if (
     id !== requestId ||
@@ -404,6 +436,81 @@ function clearPending(): void {
     window.clearTimeout(debounceId);
     debounceId = 0;
   }
+}
+
+function clearActiveEditableState(): void {
+  clearPending();
+  hideCardAndInvalidate();
+  setActiveEditable(null);
+}
+
+function hasRenderableEditableBox(element: EditableElement): boolean {
+  const rect = element.getBoundingClientRect();
+  return rect.width > 0 && rect.height > 0;
+}
+
+function setActiveEditable(element: EditableElement | null): void {
+  activeEditable = element;
+  syncActiveEditableVisibilityObservation();
+}
+
+function syncActiveEditableVisibilityObservation(): void {
+  visibilityObserver?.disconnect();
+
+  if (!activeEditable) {
+    return;
+  }
+
+  visibilityObserver ??= new MutationObserver(handleActiveEditableVisibilityMutation);
+
+  for (let current: Element | null = activeEditable; current; current = current.parentElement) {
+    visibilityObserver.observe(current, {
+      attributes: true,
+      attributeFilter: VISIBILITY_ATTRIBUTE_FILTER
+    });
+
+    if (current === document.documentElement) {
+      break;
+    }
+  }
+}
+
+function handleActiveEditableVisibilityMutation(): void {
+  if (!activeEditable) {
+    return;
+  }
+
+  if (!activeEditable.isConnected || !isEligibleEditableElement(activeEditable) || !hasRenderableEditableBox(activeEditable)) {
+    clearActiveEditableState();
+  }
+}
+
+function suppressPublishedText(element: EditableElement | null): void {
+  if (!element || !isEligibleEditableElement(element)) {
+    clearPublishedTextSuppression();
+    return;
+  }
+
+  lastPublishedText = getEditableText(element).trim();
+  lastPublishedElement = lastPublishedText ? element : null;
+}
+
+function shouldSuppressPublishedText(element: EditableElement, text: string): boolean {
+  if (!lastPublishedElement || !lastPublishedText) {
+    return false;
+  }
+
+  if (!lastPublishedElement.isConnected || element !== lastPublishedElement || text !== lastPublishedText) {
+    clearPublishedTextSuppression();
+    return false;
+  }
+
+  return true;
+}
+
+function clearPublishedTextSuppression(): void {
+  lastPublishedText = "";
+  lastPublishedElement = null;
 }
 
 function hideCardAndInvalidate(): void {

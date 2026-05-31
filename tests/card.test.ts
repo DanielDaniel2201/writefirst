@@ -4,6 +4,7 @@ describe("TranslationCard", () => {
   let cardHeight = 40;
 
   beforeEach(() => {
+    vi.useFakeTimers();
     cardHeight = 40;
     document.body.innerHTML = "";
     Object.defineProperty(window, "innerWidth", { configurable: true, value: 1000 });
@@ -28,6 +29,7 @@ describe("TranslationCard", () => {
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     vi.restoreAllMocks();
   });
 
@@ -63,6 +65,76 @@ describe("TranslationCard", () => {
     const shadowCard = host.shadowRoot?.querySelector(".card") as HTMLDivElement;
     expect(host.style.maxHeight).toBe("220px");
     expect(shadowCard.style.maxHeight).toBe("220px");
+  });
+
+  it("auto hides short translations after a brief delay", () => {
+    const card = new TranslationCard();
+    const input = createAnchor({ top: 200, bottom: 244, left: 120, width: 400, height: 44 });
+
+    card.show(input, "Short text");
+
+    const host = document.getElementById("write-first-translation-card-host") as HTMLDivElement;
+    expect(host.hidden).toBe(false);
+
+    vi.advanceTimersByTime(999);
+    expect(host.hidden).toBe(false);
+
+    vi.advanceTimersByTime(181);
+    expect(host.hidden).toBe(true);
+  });
+
+  it("keeps the card visible while hovered and restarts the timer on mouse leave", () => {
+    const card = new TranslationCard();
+    const input = createAnchor({ top: 200, bottom: 244, left: 120, width: 400, height: 44 });
+    const longTranslation =
+      "This translation is deliberately long enough to keep the card visible for a longer delay.";
+
+    card.show(input, longTranslation);
+
+    const host = document.getElementById("write-first-translation-card-host") as HTMLDivElement;
+    const shadowCard = host.shadowRoot?.querySelector(".card") as HTMLDivElement;
+
+    vi.advanceTimersByTime(2500);
+    shadowCard.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    vi.advanceTimersByTime(5000);
+    expect(host.hidden).toBe(false);
+
+    shadowCard.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+    vi.advanceTimersByTime(2999);
+    expect(host.hidden).toBe(false);
+
+    vi.advanceTimersByTime(181);
+    expect(host.hidden).toBe(true);
+  });
+
+  it("uses actual hover state as a fallback when mouseenter does not fire", () => {
+    const card = new TranslationCard();
+    const input = createAnchor({ top: 200, bottom: 244, left: 120, width: 400, height: 44 });
+
+    card.show(input, "Short text");
+
+    const host = document.getElementById("write-first-translation-card-host") as HTMLDivElement;
+    const shadowCard = host.shadowRoot?.querySelector(".card") as HTMLDivElement;
+    let hovered = true;
+    const originalHostMatches = host.matches.bind(host);
+    const originalCardMatches = shadowCard.matches.bind(shadowCard);
+
+    vi.spyOn(host, "matches").mockImplementation((selector: string) =>
+      selector === ":hover" ? hovered : originalHostMatches(selector)
+    );
+    vi.spyOn(shadowCard, "matches").mockImplementation((selector: string) =>
+      selector === ":hover" ? hovered : originalCardMatches(selector)
+    );
+
+    vi.advanceTimersByTime(1000);
+    expect(host.hidden).toBe(false);
+
+    hovered = false;
+    vi.advanceTimersByTime(120);
+    expect(host.hidden).toBe(false);
+
+    vi.advanceTimersByTime(1180);
+    expect(host.hidden).toBe(true);
   });
 });
 

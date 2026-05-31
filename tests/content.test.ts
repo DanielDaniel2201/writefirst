@@ -320,4 +320,190 @@ describe("content script", () => {
 
     expect(host.hidden).toBe(true);
   });
+
+  it("keeps the card visible when the user clicks the translation card itself", async () => {
+    const sendMessage = vi.fn().mockResolvedValue({ ok: true, translation: "Hello" });
+    vi.stubGlobal("chrome", {
+      runtime: { sendMessage },
+      storage: {
+        sync: {
+          get: vi.fn().mockResolvedValue({ ...DEFAULT_SETTINGS, idleMs: 250 }),
+          set: vi.fn()
+        },
+        onChanged: { addListener: vi.fn() }
+      }
+    });
+
+    await import("../src/content");
+    await Promise.resolve();
+    await Promise.resolve();
+
+    document.body.innerHTML = `
+      <div id="composer" role="textbox" aria-label="Post text">
+        <span id="child">hello</span>
+      </div>
+    `;
+
+    const composer = document.getElementById("composer") as HTMLElement;
+    composer.getBoundingClientRect = () =>
+      ({
+        bottom: 120,
+        height: 44,
+        left: 20,
+        right: 520,
+        top: 76,
+        width: 500,
+        x: 20,
+        y: 76,
+        toJSON: () => ({})
+      }) as DOMRect;
+
+    const childText = document.getElementById("child")?.firstChild as Text;
+    const range = document.createRange();
+    range.setStart(childText, 5);
+    range.collapse(true);
+    document.getSelection()?.removeAllRanges();
+    document.getSelection()?.addRange(range);
+    document.dispatchEvent(new Event("selectionchange"));
+
+    await vi.advanceTimersByTimeAsync(250);
+    await Promise.resolve();
+
+    const host = document.getElementById("write-first-translation-card-host") as HTMLDivElement;
+    expect(host.hidden).toBe(false);
+
+    host.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true, composed: true }));
+    host.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, composed: true }));
+    host.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true }));
+
+    expect(host.hidden).toBe(false);
+  });
+
+  it("does not retranslate the same composer text after a publish click triggers selection updates", async () => {
+    const sendMessage = vi.fn().mockResolvedValue({ ok: true, translation: "Hello" });
+    vi.stubGlobal("chrome", {
+      runtime: { sendMessage },
+      storage: {
+        sync: {
+          get: vi.fn().mockResolvedValue({ ...DEFAULT_SETTINGS, idleMs: 250 }),
+          set: vi.fn()
+        },
+        onChanged: { addListener: vi.fn() }
+      }
+    });
+
+    await import("../src/content");
+    await Promise.resolve();
+    await Promise.resolve();
+
+    document.body.innerHTML = `
+      <div id="composer" role="textbox" aria-label="Post text">
+        <span id="child">hello</span>
+      </div>
+      <button data-testid="tweetButtonInline">Post</button>
+    `;
+
+    const composer = document.getElementById("composer") as HTMLElement;
+    composer.getBoundingClientRect = () =>
+      ({
+        bottom: 120,
+        height: 44,
+        left: 20,
+        right: 520,
+        top: 76,
+        width: 500,
+        x: 20,
+        y: 76,
+        toJSON: () => ({})
+      }) as DOMRect;
+
+    const childText = document.getElementById("child")?.firstChild as Text;
+    const range = document.createRange();
+    range.setStart(childText, 5);
+    range.collapse(true);
+    document.getSelection()?.removeAllRanges();
+    document.getSelection()?.addRange(range);
+    document.dispatchEvent(new Event("selectionchange"));
+
+    await vi.advanceTimersByTimeAsync(250);
+    await Promise.resolve();
+
+    const host = document.getElementById("write-first-translation-card-host") as HTMLDivElement;
+    expect(host.hidden).toBe(false);
+    expect(sendMessage).toHaveBeenCalledTimes(1);
+
+    const button = document.querySelector("[data-testid='tweetButtonInline']") as HTMLButtonElement;
+    button.dispatchEvent(new Event("click", { bubbles: true }));
+
+    expect(host.hidden).toBe(true);
+
+    document.getSelection()?.removeAllRanges();
+    document.getSelection()?.addRange(range);
+    document.dispatchEvent(new Event("selectionchange"));
+
+    await vi.advanceTimersByTimeAsync(250);
+    await Promise.resolve();
+
+    expect(sendMessage).toHaveBeenCalledTimes(1);
+    expect(host.hidden).toBe(true);
+  });
+
+  it("hides the card when the composer becomes hidden without being removed", async () => {
+    const sendMessage = vi.fn().mockResolvedValue({ ok: true, translation: "Hello" });
+    vi.stubGlobal("chrome", {
+      runtime: { sendMessage },
+      storage: {
+        sync: {
+          get: vi.fn().mockResolvedValue({ ...DEFAULT_SETTINGS, idleMs: 250 }),
+          set: vi.fn()
+        },
+        onChanged: { addListener: vi.fn() }
+      }
+    });
+
+    await import("../src/content");
+    await Promise.resolve();
+    await Promise.resolve();
+
+    document.body.innerHTML = `
+      <div id="composer" role="textbox" aria-label="Post text">
+        <span id="child">hello</span>
+      </div>
+    `;
+
+    const composer = document.getElementById("composer") as HTMLElement;
+    let isHidden = false;
+    composer.getBoundingClientRect = () =>
+      ({
+        bottom: isHidden ? 0 : 120,
+        height: isHidden ? 0 : 44,
+        left: 20,
+        right: isHidden ? 20 : 520,
+        top: isHidden ? 0 : 76,
+        width: isHidden ? 0 : 500,
+        x: 20,
+        y: isHidden ? 0 : 76,
+        toJSON: () => ({})
+      }) as DOMRect;
+
+    const childText = document.getElementById("child")?.firstChild as Text;
+    const range = document.createRange();
+    range.setStart(childText, 5);
+    range.collapse(true);
+    document.getSelection()?.removeAllRanges();
+    document.getSelection()?.addRange(range);
+    document.dispatchEvent(new Event("selectionchange"));
+
+    await vi.advanceTimersByTimeAsync(250);
+    await Promise.resolve();
+
+    const host = document.getElementById("write-first-translation-card-host") as HTMLDivElement;
+    expect(host.hidden).toBe(false);
+
+    isHidden = true;
+    composer.setAttribute("hidden", "");
+    await Promise.resolve();
+
+    expect(host.hidden).toBe(true);
+  });
 });
