@@ -56,6 +56,22 @@ input:focus {
   outline: 2px solid rgba(59, 130, 246, 0.16);
 }
 
+input[type="range"] {
+  min-height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+  accent-color: #172033;
+}
+
+input[type="range"]:focus {
+  border-color: transparent;
+  outline: 2px solid rgba(59, 130, 246, 0.16);
+  outline-offset: 4px;
+}
+
 .switch {
   display: inline-flex;
   grid-template-columns: none;
@@ -68,6 +84,29 @@ input:focus {
   width: 16px;
   min-height: 16px;
   padding: 0;
+}
+
+.range-field {
+  gap: 7px;
+}
+
+.range-field__header,
+.range-field__scale {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.range-field__header output {
+  color: #4b5870;
+  font-weight: 650;
+}
+
+.range-field__scale {
+  color: #657086;
+  font-size: 12px;
+  font-weight: 500;
 }
 
 button {

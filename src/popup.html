@@ -27,6 +27,18 @@
           <input id="targetLanguage" name="targetLanguage" autocomplete="off" />
         </label>
 
+        <label class="range-field">
+          <span class="range-field__header">
+            Translation delay
+            <output id="idleDelayValue" for="idleDelay">0.8s</output>
+          </span>
+          <input id="idleDelay" name="idleDelay" type="range" min="800" max="1500" step="100" />
+          <span class="range-field__scale" aria-hidden="true">
+            <span>0.8s</span>
+            <span>1.5s</span>
+          </span>
+        </label>
+
         <label>
           API base URL
           <input id="baseUrl" name="baseUrl" inputmode="url" autocomplete="off" />

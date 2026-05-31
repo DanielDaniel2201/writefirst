@@ -1,5 +1,9 @@
 export type ProviderMode = "openai-compatible";
 
+export const IDLE_DELAY_MIN_MS = 800;
+export const IDLE_DELAY_MAX_MS = 1500;
+export const IDLE_DELAY_STEP_MS = 100;
+
 export interface ExtensionSettings {
   enabled: boolean;
   sourceLanguage: string;
@@ -36,7 +40,7 @@ export function normalizeSettings(value: Partial<ExtensionSettings> | undefined)
     baseUrl: trimTrailingSlash(nonEmpty(settings.baseUrl, DEFAULT_SETTINGS.baseUrl)),
     model: nonEmpty(settings.model, DEFAULT_SETTINGS.model),
     apiKey: settings.apiKey?.trim() ?? "",
-    idleMs: Math.max(250, Number(settings.idleMs) || DEFAULT_SETTINGS.idleMs),
+    idleMs: normalizeIdleMs(settings.idleMs),
     minChars: Math.max(1, Number(settings.minChars) || DEFAULT_SETTINGS.minChars)
   };
 }
@@ -57,4 +61,10 @@ function nonEmpty(value: string | undefined, fallback: string): string {
 
 function trimTrailingSlash(value: string): string {
   return value.replace(/\/+$/, "");
+}
+
+function normalizeIdleMs(value: number | undefined): number {
+  const numeric = Number(value) || DEFAULT_SETTINGS.idleMs;
+  const clamped = Math.min(IDLE_DELAY_MAX_MS, Math.max(IDLE_DELAY_MIN_MS, numeric));
+  return Math.round(clamped / IDLE_DELAY_STEP_MS) * IDLE_DELAY_STEP_MS;
 }

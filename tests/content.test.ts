@@ -21,7 +21,7 @@ describe("content script", () => {
       runtime: { sendMessage },
       storage: {
         sync: {
-          get: vi.fn().mockResolvedValue({ ...DEFAULT_SETTINGS, idleMs: 250 }),
+          get: vi.fn().mockResolvedValue(DEFAULT_SETTINGS),
           set: vi.fn()
         },
         onChanged: { addListener: vi.fn() }
@@ -65,7 +65,7 @@ describe("content script", () => {
     search.dispatchEvent(new FocusEvent("focusout", { bubbles: true, relatedTarget: document.body }));
     document.body.focus();
 
-    await vi.advanceTimersByTimeAsync(250);
+    await vi.advanceTimersByTimeAsync(800);
 
     expect(sendMessage).toHaveBeenCalledWith({
       type: "TRANSLATE_TEXT",
@@ -85,7 +85,7 @@ describe("content script", () => {
       runtime: { sendMessage },
       storage: {
         sync: {
-          get: vi.fn().mockResolvedValue({ ...DEFAULT_SETTINGS, idleMs: 250 }),
+          get: vi.fn().mockResolvedValue(DEFAULT_SETTINGS),
           set: vi.fn()
         },
         onChanged: { addListener: vi.fn() }
@@ -124,7 +124,7 @@ describe("content script", () => {
     document.getSelection()?.addRange(range);
     document.dispatchEvent(new Event("selectionchange"));
 
-    await vi.advanceTimersByTimeAsync(250);
+    await vi.advanceTimersByTimeAsync(800);
 
     expect(sendMessage).toHaveBeenCalledWith({
       type: "TRANSLATE_TEXT",
@@ -145,7 +145,7 @@ describe("content script", () => {
       runtime: { sendMessage },
       storage: {
         sync: {
-          get: vi.fn().mockResolvedValue({ ...DEFAULT_SETTINGS, idleMs: 250 }),
+          get: vi.fn().mockResolvedValue(DEFAULT_SETTINGS),
           set: vi.fn()
         },
         onChanged: { addListener: vi.fn() }
@@ -184,7 +184,7 @@ describe("content script", () => {
     document.getSelection()?.addRange(range);
     document.dispatchEvent(new Event("selectionchange"));
 
-    await vi.advanceTimersByTimeAsync(250);
+    await vi.advanceTimersByTimeAsync(800);
 
     const host = document.getElementById("write-first-translation-card-host") as HTMLDivElement;
     expect(host.hidden).toBe(false);
@@ -207,7 +207,7 @@ describe("content script", () => {
       runtime: { sendMessage },
       storage: {
         sync: {
-          get: vi.fn().mockResolvedValue({ ...DEFAULT_SETTINGS, idleMs: 250 }),
+          get: vi.fn().mockResolvedValue(DEFAULT_SETTINGS),
           set: vi.fn()
         },
         onChanged: { addListener: vi.fn() }
@@ -246,7 +246,7 @@ describe("content script", () => {
     document.getSelection()?.addRange(range);
     document.dispatchEvent(new Event("selectionchange"));
 
-    await vi.advanceTimersByTimeAsync(250);
+    await vi.advanceTimersByTimeAsync(800);
     await Promise.resolve();
 
     expect(sendMessage).toHaveBeenCalledTimes(1);
@@ -258,7 +258,7 @@ describe("content script", () => {
     document.dispatchEvent(new Event("selectionchange"));
     composer.dispatchEvent(new KeyboardEvent("keyup", { bubbles: true, key: "a", ctrlKey: true }));
 
-    await vi.advanceTimersByTimeAsync(500);
+    await vi.advanceTimersByTimeAsync(1600);
 
     expect(sendMessage).toHaveBeenCalledTimes(1);
   });
@@ -269,7 +269,7 @@ describe("content script", () => {
       runtime: { sendMessage },
       storage: {
         sync: {
-          get: vi.fn().mockResolvedValue({ ...DEFAULT_SETTINGS, idleMs: 250 }),
+          get: vi.fn().mockResolvedValue(DEFAULT_SETTINGS),
           set: vi.fn()
         },
         onChanged: { addListener: vi.fn() }
@@ -309,7 +309,7 @@ describe("content script", () => {
     document.getSelection()?.addRange(range);
     document.dispatchEvent(new Event("selectionchange"));
 
-    await vi.advanceTimersByTimeAsync(250);
+    await vi.advanceTimersByTimeAsync(800);
     await Promise.resolve();
 
     const host = document.getElementById("write-first-translation-card-host") as HTMLDivElement;
@@ -327,7 +327,7 @@ describe("content script", () => {
       runtime: { sendMessage },
       storage: {
         sync: {
-          get: vi.fn().mockResolvedValue({ ...DEFAULT_SETTINGS, idleMs: 250 }),
+          get: vi.fn().mockResolvedValue(DEFAULT_SETTINGS),
           set: vi.fn()
         },
         onChanged: { addListener: vi.fn() }
@@ -366,7 +366,7 @@ describe("content script", () => {
     document.getSelection()?.addRange(range);
     document.dispatchEvent(new Event("selectionchange"));
 
-    await vi.advanceTimersByTimeAsync(250);
+    await vi.advanceTimersByTimeAsync(800);
     await Promise.resolve();
 
     const host = document.getElementById("write-first-translation-card-host") as HTMLDivElement;
@@ -385,7 +385,7 @@ describe("content script", () => {
       runtime: { sendMessage },
       storage: {
         sync: {
-          get: vi.fn().mockResolvedValue({ ...DEFAULT_SETTINGS, idleMs: 250 }),
+          get: vi.fn().mockResolvedValue(DEFAULT_SETTINGS),
           set: vi.fn()
         },
         onChanged: { addListener: vi.fn() }
@@ -425,7 +425,7 @@ describe("content script", () => {
     document.getSelection()?.addRange(range);
     document.dispatchEvent(new Event("selectionchange"));
 
-    await vi.advanceTimersByTimeAsync(250);
+    await vi.advanceTimersByTimeAsync(800);
     await Promise.resolve();
 
     const host = document.getElementById("write-first-translation-card-host") as HTMLDivElement;
@@ -441,7 +441,7 @@ describe("content script", () => {
     document.getSelection()?.addRange(range);
     document.dispatchEvent(new Event("selectionchange"));
 
-    await vi.advanceTimersByTimeAsync(250);
+    await vi.advanceTimersByTimeAsync(800);
     await Promise.resolve();
 
     expect(sendMessage).toHaveBeenCalledTimes(1);
@@ -454,7 +454,7 @@ describe("content script", () => {
       runtime: { sendMessage },
       storage: {
         sync: {
-          get: vi.fn().mockResolvedValue({ ...DEFAULT_SETTINGS, idleMs: 250 }),
+          get: vi.fn().mockResolvedValue(DEFAULT_SETTINGS),
           set: vi.fn()
         },
         onChanged: { addListener: vi.fn() }
@@ -494,7 +494,7 @@ describe("content script", () => {
     document.getSelection()?.addRange(range);
     document.dispatchEvent(new Event("selectionchange"));
 
-    await vi.advanceTimersByTimeAsync(250);
+    await vi.advanceTimersByTimeAsync(800);
     await Promise.resolve();
 
     const host = document.getElementById("write-first-translation-card-host") as HTMLDivElement;
