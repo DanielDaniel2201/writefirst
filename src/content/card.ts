@@ -6,10 +6,13 @@ const FLIP_ABOVE_SPACE_THRESHOLD = 120;
 const FALLBACK_CARD_HEIGHT = 72;
 const MIN_CARD_HEIGHT = 32;
 const MAX_CARD_HEIGHT = 220;
-const MIN_CARD_WIDTH = 220;
-const DEFAULT_CARD_WIDTH = 260;
 const MAX_CARD_WIDTH = 520;
 const VIEWPORT_PADDING = 12;
+const CARD_HORIZONTAL_PADDING = 24;
+const CARD_HORIZONTAL_BORDER = 2;
+const APPROX_ASCII_CHAR_WIDTH = 7.2;
+const APPROX_SPACE_CHAR_WIDTH = 3.6;
+const APPROX_WIDE_CHAR_WIDTH = 13;
 const SHORT_TEXT_VISIBLE_CHARS = 12;
 const SHORT_TEXT_HIDE_DELAY_MS = 1000;
 const LONG_TEXT_HIDE_DELAY_MS = 3000;
@@ -110,6 +113,7 @@ export class TranslationCard {
 
       .card {
         box-sizing: border-box;
+        display: inline-block;
         min-height: 32px;
         max-height: 220px;
         overflow: auto;
@@ -165,9 +169,9 @@ export class TranslationCard {
       return;
     }
 
-    const left = Math.max(VIEWPORT_PADDING, Math.min(rect.left, window.innerWidth - VIEWPORT_PADDING - MIN_CARD_WIDTH));
-    const availableWidth = Math.max(MIN_CARD_WIDTH, window.innerWidth - left - VIEWPORT_PADDING);
-    const width = Math.min(Math.max(rect.width, DEFAULT_CARD_WIDTH), availableWidth, MAX_CARD_WIDTH);
+    const maxWidth = Math.min(MAX_CARD_WIDTH, window.innerWidth - VIEWPORT_PADDING * 2);
+    const width = this.measureCardWidth(maxWidth);
+    const left = Math.max(VIEWPORT_PADDING, Math.min(rect.left, window.innerWidth - VIEWPORT_PADDING - width));
     const spaceBelow = window.innerHeight - rect.bottom - VIEWPORT_PADDING;
     const spaceAbove = rect.top - VIEWPORT_PADDING;
     const shouldOpenAbove = spaceBelow < FLIP_ABOVE_SPACE_THRESHOLD && spaceAbove > spaceBelow;
@@ -180,6 +184,8 @@ export class TranslationCard {
     this.host.style.maxHeight = `${maxHeight}px`;
 
     if (this.content) {
+      this.content.style.width = `${width}px`;
+      this.content.style.maxWidth = `${width}px`;
       this.content.style.maxHeight = `${maxHeight}px`;
     }
 
@@ -189,6 +195,31 @@ export class TranslationCard {
       : Math.min(rect.bottom + CARD_GAP, window.innerHeight - VIEWPORT_PADDING);
 
     this.host.style.top = `${top + window.scrollY}px`;
+  }
+
+  private measureCardWidth(maxWidth: number): number {
+    const measuredWidth = this.measureRenderedCardWidth(maxWidth);
+    if (measuredWidth) {
+      return measuredWidth;
+    }
+
+    return Math.min(maxWidth, estimateCardWidth(this.content?.textContent ?? ""));
+  }
+
+  private measureRenderedCardWidth(maxWidth: number): number {
+    if (!this.host || !this.content) {
+      return 0;
+    }
+
+    this.host.style.width = "auto";
+    this.host.style.maxWidth = `${maxWidth}px`;
+    this.content.style.width = "fit-content";
+    this.content.style.maxWidth = `${maxWidth}px`;
+
+    const measuredWidth =
+      this.content.getBoundingClientRect().width || this.content.offsetWidth || this.content.scrollWidth;
+
+    return measuredWidth ? Math.min(maxWidth, Math.ceil(measuredWidth)) : 0;
   }
 
   private measureCardHeight(maxHeight: number): number {
@@ -305,4 +336,32 @@ function resolveAutoHideDelay(text: string, tone: CardTone): number {
 
   const visibleChars = Array.from(text.replace(/\s+/g, "")).length;
   return visibleChars <= SHORT_TEXT_VISIBLE_CHARS ? SHORT_TEXT_HIDE_DELAY_MS : LONG_TEXT_HIDE_DELAY_MS;
+}
+
+function estimateCardWidth(text: string): number {
+  const widestLineWidth = Math.max(
+    ...text.split(/\r?\n/).map((line) => estimateLineWidth(line)),
+    APPROX_ASCII_CHAR_WIDTH * 2
+  );
+
+  return Math.ceil(widestLineWidth + CARD_HORIZONTAL_PADDING + CARD_HORIZONTAL_BORDER);
+}
+
+function estimateLineWidth(text: string): number {
+  let width = 0;
+
+  for (const char of text) {
+    if (/\s/.test(char)) {
+      width += APPROX_SPACE_CHAR_WIDTH;
+      continue;
+    }
+
+    width += isWideCharacter(char) ? APPROX_WIDE_CHAR_WIDTH : APPROX_ASCII_CHAR_WIDTH;
+  }
+
+  return width;
+}
+
+function isWideCharacter(char: string): boolean {
+  return /[^\u0000-\u00ff]/.test(char);
 }

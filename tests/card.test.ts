@@ -67,6 +67,28 @@ describe("TranslationCard", () => {
     expect(shadowCard.style.maxHeight).toBe("220px");
   });
 
+  it("shrinks the card width to fit a short translation", () => {
+    const card = new TranslationCard();
+    const input = createAnchor({ top: 200, bottom: 244, left: 120, width: 400, height: 44 });
+
+    card.show(input, "Hi");
+
+    const host = document.getElementById("write-first-translation-card-host") as HTMLDivElement;
+    expect(Number.parseInt(host.style.width, 10)).toBeGreaterThan(30);
+    expect(Number.parseInt(host.style.width, 10)).toBeLessThan(100);
+  });
+
+  it("shrinks the loading card width to fit its placeholder text", () => {
+    const card = new TranslationCard();
+    const input = createAnchor({ top: 200, bottom: 244, left: 120, width: 400, height: 44 });
+
+    card.show(input, "Translating...", "loading");
+
+    const host = document.getElementById("write-first-translation-card-host") as HTMLDivElement;
+    expect(Number.parseInt(host.style.width, 10)).toBeGreaterThan(80);
+    expect(Number.parseInt(host.style.width, 10)).toBeLessThan(160);
+  });
+
   it("auto hides short translations after a brief delay", () => {
     const card = new TranslationCard();
     const input = createAnchor({ top: 200, bottom: 244, left: 120, width: 400, height: 44 });
