@@ -31,6 +31,7 @@ export class TranslationCard {
   private fadeTimeoutId = 0;
   private hoverPollTimeoutId = 0;
   private isHovered = false;
+  private isDismissing = false;
   private currentTone: CardTone = "translation";
   private autoHideDelay = 0;
 
@@ -38,6 +39,7 @@ export class TranslationCard {
     this.ensure();
     this.cancelHideTimers();
     this.anchor = anchor;
+    this.isDismissing = false;
     this.currentTone = tone;
     this.autoHideDelay = tone === "loading" ? 0 : resolveAutoHideDelay(translation, tone);
 
@@ -49,6 +51,7 @@ export class TranslationCard {
     this.content.className = `card card--${tone}`;
     this.content.classList.add("card--visible");
     this.host.hidden = false;
+    this.host.style.pointerEvents = "auto";
     this.position();
     this.scheduleAutoHide();
   }
@@ -57,9 +60,11 @@ export class TranslationCard {
     this.cancelHideTimers();
     this.anchor = null;
     this.isHovered = false;
+    this.isDismissing = false;
 
     if (this.host && this.content) {
       this.content.classList.remove("card--visible");
+      this.host.style.pointerEvents = "none";
       this.host.hidden = true;
     }
   }
@@ -83,6 +88,7 @@ export class TranslationCard {
     this.content = null;
     this.anchor = null;
     this.isHovered = false;
+    this.isDismissing = false;
   }
 
   private ensure(): void {
@@ -96,7 +102,7 @@ export class TranslationCard {
     this.host.hidden = true;
     this.host.style.position = "absolute";
     this.host.style.zIndex = "2147483647";
-    this.host.style.pointerEvents = "auto";
+    this.host.style.pointerEvents = "none";
 
     if (!host) {
       document.documentElement.append(this.host);
@@ -236,8 +242,17 @@ export class TranslationCard {
       return;
     }
 
+    if (this.hideTimeoutId) {
+      window.clearTimeout(this.hideTimeoutId);
+      this.hideTimeoutId = 0;
+    }
+
     this.hideTimeoutId = window.setTimeout(() => {
       this.hideTimeoutId = 0;
+
+      if (this.isDismissing || this.host?.hidden) {
+        return;
+      }
 
       if (this.isPointerInsideCard()) {
         this.isHovered = true;
@@ -254,6 +269,11 @@ export class TranslationCard {
       return;
     }
 
+    this.isDismissing = true;
+    this.isHovered = false;
+    this.anchor = null;
+    this.stopHoverPolling();
+    this.host.style.pointerEvents = "none";
     this.content.classList.remove("card--visible");
     this.fadeTimeoutId = window.setTimeout(() => {
       this.fadeTimeoutId = 0;
@@ -282,12 +302,20 @@ export class TranslationCard {
   }
 
   private readonly handleMouseEnter = (): void => {
+    if (this.isDismissing || this.host?.hidden) {
+      return;
+    }
+
     this.isHovered = true;
     this.cancelHideTimers();
     this.content?.classList.add("card--visible");
   };
 
   private readonly handleMouseLeave = (): void => {
+    if (this.isDismissing || this.host?.hidden) {
+      return;
+    }
+
     this.isHovered = false;
     this.stopHoverPolling();
 

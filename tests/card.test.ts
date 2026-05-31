@@ -105,6 +105,44 @@ describe("TranslationCard", () => {
     expect(host.hidden).toBe(true);
   });
 
+  it("does not revive when hovered during the fade-out after auto hide", () => {
+    const card = new TranslationCard();
+    const input = createAnchor({ top: 200, bottom: 244, left: 120, width: 400, height: 44 });
+
+    card.show(input, "Short text");
+
+    const host = document.getElementById("write-first-translation-card-host") as HTMLDivElement;
+    const shadowCard = host.shadowRoot?.querySelector(".card") as HTMLDivElement;
+
+    vi.advanceTimersByTime(1000);
+    expect(host.hidden).toBe(false);
+    expect(host.style.pointerEvents).toBe("none");
+    expect(shadowCard.classList.contains("card--visible")).toBe(false);
+
+    shadowCard.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    expect(shadowCard.classList.contains("card--visible")).toBe(false);
+
+    vi.advanceTimersByTime(180);
+    expect(host.hidden).toBe(true);
+  });
+
+  it("ignores hover after the card has fully hidden", () => {
+    const card = new TranslationCard();
+    const input = createAnchor({ top: 200, bottom: 244, left: 120, width: 400, height: 44 });
+
+    card.show(input, "Short text");
+
+    const host = document.getElementById("write-first-translation-card-host") as HTMLDivElement;
+    const shadowCard = host.shadowRoot?.querySelector(".card") as HTMLDivElement;
+
+    vi.advanceTimersByTime(1180);
+    expect(host.hidden).toBe(true);
+
+    shadowCard.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    expect(host.hidden).toBe(true);
+    expect(shadowCard.classList.contains("card--visible")).toBe(false);
+  });
+
   it("keeps the card visible while hovered and restarts the timer on mouse leave", () => {
     const card = new TranslationCard();
     const input = createAnchor({ top: 200, bottom: 244, left: 120, width: 400, height: 44 });
