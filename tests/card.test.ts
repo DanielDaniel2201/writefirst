@@ -98,7 +98,7 @@ describe("TranslationCard", () => {
     const host = document.getElementById("write-first-translation-card-host") as HTMLDivElement;
     expect(host.hidden).toBe(false);
 
-    vi.advanceTimersByTime(999);
+    vi.advanceTimersByTime(1499);
     expect(host.hidden).toBe(false);
 
     vi.advanceTimersByTime(181);
@@ -114,7 +114,7 @@ describe("TranslationCard", () => {
     const host = document.getElementById("write-first-translation-card-host") as HTMLDivElement;
     const shadowCard = host.shadowRoot?.querySelector(".card") as HTMLDivElement;
 
-    vi.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(1500);
     expect(host.hidden).toBe(false);
     expect(host.style.pointerEvents).toBe("none");
     expect(shadowCard.classList.contains("card--visible")).toBe(false);
@@ -135,7 +135,7 @@ describe("TranslationCard", () => {
     const host = document.getElementById("write-first-translation-card-host") as HTMLDivElement;
     const shadowCard = host.shadowRoot?.querySelector(".card") as HTMLDivElement;
 
-    vi.advanceTimersByTime(1180);
+    vi.advanceTimersByTime(1680);
     expect(host.hidden).toBe(true);
 
     shadowCard.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
@@ -154,13 +154,13 @@ describe("TranslationCard", () => {
     const host = document.getElementById("write-first-translation-card-host") as HTMLDivElement;
     const shadowCard = host.shadowRoot?.querySelector(".card") as HTMLDivElement;
 
-    vi.advanceTimersByTime(2500);
+    vi.advanceTimersByTime(4000);
     shadowCard.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
     vi.advanceTimersByTime(5000);
     expect(host.hidden).toBe(false);
 
     shadowCard.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
-    vi.advanceTimersByTime(2999);
+    vi.advanceTimersByTime(4499);
     expect(host.hidden).toBe(false);
 
     vi.advanceTimersByTime(181);
@@ -186,14 +186,14 @@ describe("TranslationCard", () => {
       selector === ":hover" ? hovered : originalCardMatches(selector)
     );
 
-    vi.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(1500);
     expect(host.hidden).toBe(false);
 
     hovered = false;
     vi.advanceTimersByTime(120);
     expect(host.hidden).toBe(false);
 
-    vi.advanceTimersByTime(1180);
+    vi.advanceTimersByTime(1680);
     expect(host.hidden).toBe(true);
   });
 });
