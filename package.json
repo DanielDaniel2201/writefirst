@@ -3,11 +3,20 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "packageManager": "npm@11.12.1",
+  "workspaces": [
+    "apps/web"
+  ],
   "scripts": {
     "build": "node scripts/build.mjs",
+    "build:web": "npm run package:extension && npm --workspace @write-first/web run build",
+    "dev:web": "npm --workspace @write-first/web run dev",
+    "package:extension": "npm run build && node scripts/package-extension.mjs",
+    "preview:web": "npm --workspace @write-first/web run preview",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "verify": "npm run typecheck && npm run test && npm run build"
+    "verify": "npm run typecheck && npm run test && npm run build",
+    "verify:web": "npm --workspace @write-first/web run typecheck && npm run build:web"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.326",

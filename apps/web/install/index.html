@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="下载 Write First Chrome 扩展包，并通过 Chrome Load unpacked 安装。"
+    />
+    <title>Install Write First</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar">
+        <a class="brand" href="/">Write First</a>
+        <nav class="nav">
+          <a href="/">Home</a>
+        </nav>
+      </header>
+
+      <main class="screen install-screen">
+        <h1>
+          <span>下载扩展包</span>
+          <span>用 Chrome 加载</span>
+        </h1>
+
+        <div class="value-list compact">
+          <div class="value-row">
+            <span class="number">1</span>
+            <p>下载并解压 <code>write-first-extension.zip</code>。</p>
+          </div>
+          <div class="value-row">
+            <span class="number">2</span>
+            <p>打开 <code>chrome://extensions</code>，开启 Developer mode。</p>
+          </div>
+          <div class="value-row">
+            <span class="number">3</span>
+            <p>点击 Load unpacked，选择含 <code>manifest.json</code> 的文件夹。</p>
+          </div>
+          <div class="value-row">
+            <span class="number">4</span>
+            <p>点插件图标，配置母语、目标语、模型和 API Key。</p>
+          </div>
+          <img class="setup-shot" src="/media/popup-settings.svg" alt="Write First 插件配置弹窗" />
+        </div>
+
+        <div class="action-grid">
+          <div>
+            <p class="label">DOWNLOAD</p>
+            <a class="button" href="/downloads/write-first-extension.zip" download>
+              下载 Write First 扩展包
+            </a>
+          </div>
+          <div class="notes">
+            <p class="label">PACKAGE</p>
+            <p>ZIP 里是 Chrome unpacked extension，不是 exe 安装器。</p>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
