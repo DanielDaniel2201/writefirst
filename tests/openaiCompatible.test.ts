@@ -21,9 +21,25 @@ describe("openai compatible provider", () => {
 
     const body = JSON.parse(request.init.body as string);
     expect(body.model).toBe("model-a");
+    expect(body.thinking).toBeUndefined();
     expect(body.messages[0].content).toContain("Return only a natural translation in English");
     expect(body.messages[1].content).toContain("Translate from Chinese to English");
     expect(body.messages[1].content).toContain("你好");
+  });
+
+  it("includes thinking only when enabled", () => {
+    const request = buildTranslationRequest(
+      {
+        ...DEFAULT_SETTINGS,
+        thinkingEnabled: true
+      },
+      "hello",
+      "Chinese",
+      "English"
+    );
+
+    const body = JSON.parse(request.init.body as string);
+    expect(body.thinking).toEqual({ type: "enabled" });
   });
 
   it("does not append the endpoint twice", () => {

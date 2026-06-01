@@ -41,6 +41,10 @@ export function buildTranslationRequest(
     ]
   };
 
+  if (settings.thinkingEnabled) {
+    Object.assign(body, { thinking: { type: "enabled" } });
+  }
+
   return {
     url: endpoint,
     init: {

@@ -11,6 +11,7 @@ export interface ExtensionSettings {
   providerMode: ProviderMode;
   baseUrl: string;
   model: string;
+  thinkingEnabled: boolean;
   apiKey: string;
   idleMs: number;
   minChars: number;
@@ -23,6 +24,7 @@ export const DEFAULT_SETTINGS: ExtensionSettings = {
   providerMode: "openai-compatible",
   baseUrl: "https://api.openai.com/v1",
   model: "gpt-4o-mini",
+  thinkingEnabled: false,
   apiKey: "",
   idleMs: 800,
   minChars: 2
@@ -39,6 +41,7 @@ export function normalizeSettings(value: Partial<ExtensionSettings> | undefined)
     providerMode: "openai-compatible",
     baseUrl: trimTrailingSlash(nonEmpty(settings.baseUrl, DEFAULT_SETTINGS.baseUrl)),
     model: nonEmpty(settings.model, DEFAULT_SETTINGS.model),
+    thinkingEnabled: Boolean(settings.thinkingEnabled),
     apiKey: settings.apiKey?.trim() ?? "",
     idleMs: normalizeIdleMs(settings.idleMs),
     minChars: Math.max(1, Number(settings.minChars) || DEFAULT_SETTINGS.minChars)

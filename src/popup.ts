@@ -17,6 +17,7 @@ const idleDelay = document.getElementById("idleDelay") as HTMLInputElement;
 const idleDelayValue = document.getElementById("idleDelayValue") as HTMLOutputElement;
 const baseUrl = document.getElementById("baseUrl") as HTMLInputElement;
 const model = document.getElementById("model") as HTMLInputElement;
+const thinkingEnabled = document.getElementById("thinkingEnabled") as HTMLInputElement;
 const apiKey = document.getElementById("apiKey") as HTMLInputElement;
 const status = document.getElementById("status") as HTMLParagraphElement;
 
@@ -56,6 +57,7 @@ async function persist(message = "Settings saved."): Promise<void> {
     idleMs: Number(idleDelay.value),
     baseUrl: baseUrl.value,
     model: model.value,
+    thinkingEnabled: thinkingEnabled.checked,
     apiKey: apiKey.value
   });
 
@@ -72,6 +74,7 @@ function applySettings(settings: ExtensionSettings): void {
   updateIdleDelayValue(settings.idleMs);
   baseUrl.value = settings.baseUrl;
   model.value = settings.model;
+  thinkingEnabled.checked = settings.thinkingEnabled;
   apiKey.value = settings.apiKey;
 }
 
