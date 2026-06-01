@@ -5,53 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Write First 是一个 Chrome 写作旁注插件。先写下你想说的话，再看到目标语言表达。"
+      content="Write First 是一个 Chrome 写作旁注扩展。先写，再看目标语言怎么说。"
     />
     <title>Write First</title>
     <link rel="stylesheet" href="/src/styles.css" />
+    <script type="module" src="/src/main.ts"></script>
   </head>
   <body>
-    <div class="page-shell">
-      <header class="topbar">
-        <a class="brand" href="/">Write First</a>
-        <nav class="nav">
-          <a href="/install/">Install</a>
-        </nav>
-      </header>
+    <main class="page">
+      <section class="copy">
+        <h1>用母语表达<br />看用目标语言怎么说</h1>
+        <p class="lede">
+          学习外语，是为了能表达我们日常用母语表达的内容
+        </p>
+        <a class="button" href="/install/">安装</a>
+      </section>
 
-      <main class="screen home-screen">
-        <h1>
-          <span>先写下你想说的</span>
-          <span>再看外语怎么说</span>
-        </h1>
-
-        <div class="value-list">
-          <div class="value-row">
-            <span class="number">1</span>
-            <p>在任何普通输入框里，先用母语写。</p>
-          </div>
-          <div class="value-row">
-            <span class="number">2</span>
-            <p>停顿一下，旁边出现目标语言表达。</p>
-          </div>
+      <section class="media" aria-label="Write First demo">
+        <div class="frame">
+          <img
+            class="demo"
+            src="/media/write-first-demo.gif"
+            alt="Write First 在输入框旁显示目标语言旁注的演示"
+          />
         </div>
-
-        <div class="action-grid">
-          <div>
-            <p class="label">TRY IT NOW</p>
-            <a class="button" href="/install/">立即安装</a>
-          </div>
-          <div class="notes">
-            <p class="label">NO MAGIC WRITING</p>
-            <p>不改写输入。不自动提交。不保存输入历史。</p>
-          </div>
-        </div>
-
-        <div class="demo-strip" aria-label="Write First demo">
-          <p class="label">SEE IT</p>
-          <img src="/media/write-first-demo.gif" alt="Write First 在输入框旁边显示目标语言旁注的演示" />
-        </div>
-      </main>
-    </div>
+      </section>
+    </main>
   </body>
 </html>

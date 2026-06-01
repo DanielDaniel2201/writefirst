@@ -1,7 +1,5 @@
-const downloadLink = document.querySelector<HTMLAnchorElement>("[data-download-link]");
-
-if (downloadLink) {
-  downloadLink.addEventListener("click", () => {
-    downloadLink.dataset.state = "started";
+document.querySelectorAll<HTMLAnchorElement>("[data-download-link]").forEach((link) => {
+  link.addEventListener("click", () => {
+    link.dataset.state = "started";
   });
-}
+});
