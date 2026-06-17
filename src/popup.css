@@ -40,6 +40,10 @@ label {
   font-weight: 550;
 }
 
+details {
+  display: block;
+}
+
 input {
   width: 100%;
   min-height: 34px;
@@ -120,6 +124,49 @@ input[type="range"]:focus {
   color: #657086;
   font-size: 12px;
   font-weight: 500;
+}
+
+.settings-section {
+  border: 1px solid #d8deea;
+  border-radius: 6px;
+  background: #ffffff;
+}
+
+.settings-section summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 34px;
+  padding: 9px 10px;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+
+.settings-section summary::-webkit-details-marker {
+  display: none;
+}
+
+.settings-section summary::after {
+  content: "+";
+  color: #657086;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.settings-section[open] summary {
+  border-bottom: 1px solid #e5e9f2;
+}
+
+.settings-section[open] summary::after {
+  content: "-";
+}
+
+.settings-section__body {
+  display: grid;
+  gap: 10px;
+  padding: 10px;
 }
 
 button {

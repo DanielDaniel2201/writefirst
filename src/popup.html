@@ -39,25 +39,31 @@
           </span>
         </label>
 
-        <label>
-          API base URL
-          <input id="baseUrl" name="baseUrl" inputmode="url" autocomplete="off" />
-        </label>
+        <details class="settings-section">
+          <summary>LLM configuration</summary>
 
-        <label>
-          Model
-          <input id="model" name="model" autocomplete="off" />
-        </label>
+          <div class="settings-section__body">
+            <label>
+              API base URL
+              <input id="baseUrl" name="baseUrl" inputmode="url" autocomplete="off" />
+            </label>
 
-        <label class="checkbox-field">
-          <input id="thinkingEnabled" name="thinkingEnabled" type="checkbox" />
-          <span>Enable thinking</span>
-        </label>
+            <label>
+              Model
+              <input id="model" name="model" autocomplete="off" />
+            </label>
 
-        <label>
-          API key
-          <input id="apiKey" name="apiKey" type="password" autocomplete="off" />
-        </label>
+            <label class="checkbox-field">
+              <input id="thinkingEnabled" name="thinkingEnabled" type="checkbox" />
+              <span>Enable thinking</span>
+            </label>
+
+            <label>
+              API key
+              <input id="apiKey" name="apiKey" type="password" autocomplete="off" />
+            </label>
+          </div>
+        </details>
 
         <button type="submit">Save</button>
       </form>
