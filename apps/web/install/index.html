@@ -5,38 +5,142 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="下载 Write First Chrome 扩展包，并按步骤完成安装。"
+      content="下载 Write First Chrome 扩展，按步骤完成安装，并配置语言、模型和 API 接口。"
     />
-    <title>Install Write First</title>
+    <title>安装 Write First</title>
     <link rel="stylesheet" href="/src/styles.css" />
     <script type="module" src="/src/main.ts"></script>
   </head>
   <body>
-    <main class="page page--install">
-      <section class="copy">
-        <div class="title-row">
-          <h1>下载并安装</h1>
-          <a class="button" href="/downloads/write-first-extension.zip" download data-download-link>
-            下载安装包
-          </a>
-        </div>
-        <ol class="guide">
-          <li>下载并解压 <code>write-first-extension.zip</code></li>
-          <li>打开 <code>chrome://extensions</code>，开启 Developer mode</li>
-          <li>点击 Load unpacked，选择解压后包含 <code>manifest.json</code> 的目录</li>
-          <li>打开扩展，设置语言、base URL、model 和 API Key</li>
-        </ol>
-      </section>
+    <div class="site-shell">
+      <header class="site-nav" aria-label="主导航">
+        <a class="brand-mark" href="/">
+          <span class="brand-mark__glyph">WF</span>
+          <span>Write First</span>
+        </a>
+        <nav class="nav-links">
+          <a href="/">首页</a>
+          <a href="/#principle">理念</a>
+          <a href="/#faq">FAQ</a>
+          <a href="/install/">安装</a>
+        </nav>
+      </header>
 
-      <section class="media" aria-label="Write First settings screenshot">
-        <div class="frame">
-          <img
-            class="shot"
-            src="/media/popup-settings.svg"
-            alt="Write First 设置界面截图"
-          />
-        </div>
-      </section>
-    </main>
+      <main class="page">
+        <section class="hero hero--install">
+          <div class="stack-24">
+            <p class="eyebrow">安装与配置</p>
+            <div class="stack-16">
+              <h1>三步装好扩展，再用你自己的接口开始翻译。</h1>
+              <p class="lede">
+                Write First 当前以 Chrome Manifest V3 扩展形式提供。下载压缩包、在 Chrome 中加载、填入语言和接口设置后，就可以在真实网页输入框里开始测试。
+              </p>
+            </div>
+            <div class="actions">
+              <a
+                class="button button--primary"
+                href="/downloads/write-first-extension.zip"
+                download
+                data-download-link
+              >
+                下载扩展包
+              </a>
+              <a class="button button--ghost" href="/">返回首页</a>
+            </div>
+          </div>
+
+          <div class="hero-visual">
+            <div class="frame frame--demo">
+              <div class="frame__bar">
+                <div class="frame__dots" aria-hidden="true">
+                  <i></i>
+                  <i></i>
+                  <i></i>
+                </div>
+                <span>Popup 设置界面</span>
+              </div>
+              <img
+                class="shot"
+                src="/media/popup-settings.svg"
+                alt="Write First 的扩展设置界面截图"
+              />
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="install-grid">
+            <div class="install-stack">
+              <article class="step-card">
+                <span class="step-card__index">01</span>
+                <h3>下载并解压扩展包</h3>
+                <p class="caption">
+                  点击“下载扩展包”后，解压 <code>write-first-extension.zip</code>，保留包含
+                  <code>manifest.json</code> 的目录。
+                </p>
+              </article>
+
+              <article class="step-card">
+                <span class="step-card__index">02</span>
+                <h3>在 Chrome 中加载 unpacked extension</h3>
+                <ol class="guide-list">
+                  <li>打开 <code>chrome://extensions</code></li>
+                  <li>打开右上角的 Developer mode</li>
+                  <li>点击 Load unpacked，选择刚才解压后的扩展目录</li>
+                </ol>
+              </article>
+
+              <article class="step-card">
+                <span class="step-card__index">03</span>
+                <h3>完成基础配置并开始测试</h3>
+                <p class="caption">
+                  打开扩展 Popup，设置源语言、目标语言、Base URL、Model 与 API Key。随后在任意常规文本输入框里输入至少两个可见字符并停顿，即可看到旁注卡片。
+                </p>
+              </article>
+            </div>
+
+            <aside class="install-visual stack-16">
+              <article class="config-card stack-16">
+                <h3>建议先检查这些设置</h3>
+                <ul class="bullet-list">
+                  <li>Base URL 如果未以 <code>/chat/completions</code> 结尾，扩展会自动补全。</li>
+                  <li>返回内容应只有自然的目标语言翻译，不需要解释、注释或引号。</li>
+                  <li>扩展启用后，只有用户当前输入的文本会发送到配置的接口。</li>
+                </ul>
+              </article>
+              <p class="caption">截图展示的是最小配置面板：启用开关、语言、Base URL、Model 与 API Key。</p>
+            </aside>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="stack-24">
+            <div class="stack-16">
+              <p class="eyebrow">配置边界</p>
+              <h2>产品行为尽量克制，尽可能不打断用户当前写作流程。</h2>
+            </div>
+
+            <div class="config-grid">
+              <article class="boundary-card">
+                <strong>会工作的输入区域</strong>
+                <p>普通文本输入框、搜索框、textarea，以及常见 contenteditable 编辑区域。</p>
+              </article>
+              <article class="boundary-card">
+                <strong>会被跳过的字段</strong>
+                <p>密码、邮箱、电话、URL、数字、OTP、支付类、hidden、disabled、readonly 等敏感或不适用字段。</p>
+              </article>
+              <article class="boundary-card">
+                <strong>卡片何时出现</strong>
+                <p>用户停止输入 800ms，且当前文本有至少 2 个可见非空白字符时，请求翻译并显示卡片。</p>
+              </article>
+              <article class="boundary-card">
+                <strong>卡片何时消失</strong>
+                <p>继续输入、清空文本、失焦、元素移除、扩展关闭或出现更新请求时，旧卡片会立即隐藏。</p>
+              </article>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
   </body>
 </html>

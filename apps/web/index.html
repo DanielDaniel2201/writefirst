@@ -5,31 +5,190 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Write First 是一个 Chrome 写作旁注扩展。先写，再看目标语言怎么说。"
+      content="Write First 是一个安静的 Chrome 写作旁注。用户先写自己的母语表达，再看到目标语言里自然的说法。"
     />
     <title>Write First</title>
     <link rel="stylesheet" href="/src/styles.css" />
     <script type="module" src="/src/main.ts"></script>
   </head>
   <body>
-    <main class="page">
-      <section class="copy">
-        <h1>用母语表达<br />看用目标语言怎么说</h1>
-        <p class="lede">
-          学习外语，是为了能表达我们日常用母语表达的内容
-        </p>
-        <a class="button" href="/install/">安装</a>
-      </section>
+    <div class="site-shell">
+      <header class="site-nav" aria-label="主导航">
+        <a class="brand-mark" href="/">
+          <span class="brand-mark__glyph">WF</span>
+          <span>Write First</span>
+        </a>
+        <nav class="nav-links">
+          <a href="#principle">理念</a>
+          <a href="#scenarios">场景</a>
+          <a href="#faq">FAQ</a>
+          <a href="/install/">安装</a>
+        </nav>
+      </header>
 
-      <section class="media" aria-label="Write First demo">
-        <div class="frame">
-          <img
-            class="demo"
-            src="/media/write-first-demo.gif"
-            alt="Write First 在输入框旁显示目标语言旁注的演示"
-          />
-        </div>
-      </section>
-    </main>
+      <main class="page">
+        <section class="hero" id="top">
+          <div class="stack-32">
+            <div class="stack-20">
+              <p class="eyebrow">Write First / Chrome Extension</p>
+              <div class="stack-16">
+                <h1>先表达你真正想说的话，再看目标语言怎么说。</h1>
+                <p class="lede">
+                  Write First 不替你写，不替你发，也不替你改。它只在你停下来的一刻，
+                  把同一句话在目标语言里的自然表达安静地放在输入框旁边。
+                </p>
+              </div>
+            </div>
+
+            <div class="actions">
+              <a class="button button--primary" href="/install/">安装扩展</a>
+              <a class="button button--ghost" href="#principle">查看产品理念</a>
+            </div>
+
+            <div class="meta-strip" aria-label="产品原则摘要">
+              <div class="meta-card">
+                <span>触发方式</span>
+                <strong>输入停止 800ms 后再翻译</strong>
+              </div>
+              <div class="meta-card">
+                <span>展示形式</span>
+                <strong>只读旁注卡片，不接管输入</strong>
+              </div>
+              <div class="meta-card">
+                <span>数据边界</span>
+                <strong>只发送当前文本到用户配置的接口</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-visual" aria-label="Write First 演示">
+            <div class="frame frame--demo">
+              <div class="frame__bar">
+                <div class="frame__dots" aria-hidden="true">
+                  <i></i>
+                  <i></i>
+                  <i></i>
+                </div>
+                <span>真实输入框中的旁注体验</span>
+              </div>
+              <img
+                class="demo"
+                src="/media/write-first-demo.gif"
+                alt="Write First 在网页输入框旁边展示目标语言翻译卡片的演示"
+              />
+            </div>
+
+            <aside class="hero-note" aria-label="核心交互说明">
+              <strong>保持原页面行为</strong>
+              <p>
+                不抢焦点，不拦截回车，不替换文本。用户仍在原网站、原输入框、原语境中完成表达。
+              </p>
+            </aside>
+          </div>
+        </section>
+
+        <section class="section" id="principle">
+          <div class="stack-24">
+            <div class="stack-16">
+              <p class="eyebrow">产品理念</p>
+              <h2>不是代写工具，而是把“我刚想说的话”翻成目标语言给你看。</h2>
+            </div>
+
+            <div class="section-grid">
+              <article class="info-card stack-16">
+                <h3>学习材料来自用户当下真的想表达的内容</h3>
+                <p>
+                  用户不是先读一批被设计好的练习句子，而是在真实搜索、评论、记录、沟通的瞬间，
+                  看到自己这句话在另一门语言里会怎么自然地说。
+                </p>
+              </article>
+              <article class="info-card stack-16">
+                <h3>翻译卡片只负责呈现，不负责操作</h3>
+                <p>
+                  卡片不会插入文字，不会变成新的编辑器，也不会引导用户“接受建议”。
+                  它是一条安静的旁注，帮助比较、记忆和内化。
+                </p>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="scenarios">
+          <div class="stack-24">
+            <div class="stack-16">
+              <p class="eyebrow">使用场景</p>
+              <h2>在最容易产生表达欲的地方学习，而不是跳到另一个学习界面。</h2>
+            </div>
+
+            <div class="scenario-grid">
+              <article class="scenario">
+                <h3>搜索框</h3>
+                <p>准备搜索一个问题时，先用母语写出来，再顺手对照目标语言怎么组织关键词与语气。</p>
+              </article>
+              <article class="scenario">
+                <h3>评论区与社交输入框</h3>
+                <p>想回复、想发言、想表达观点时，旁边立即出现更自然的目标语言说法，帮助用户慢慢从“看懂”转向“会说”。</p>
+              </article>
+              <article class="scenario">
+                <h3>个人笔记与草稿</h3>
+                <p>记录想法、列待办、写提纲时，用户面对的是自己最熟悉、最有记忆点的内容，因此更容易形成长期语言积累。</p>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="faq">
+          <div class="stack-24">
+            <div class="stack-16">
+              <p class="eyebrow">FAQ</p>
+              <h2>把产品边界说清楚，比堆功能更重要。</h2>
+            </div>
+
+            <div class="faq-list" data-faq-root>
+              <article class="faq-item">
+                <button class="faq-trigger" type="button" aria-expanded="true">
+                  <span>它会自动把我的母语替换成目标语言吗？</span>
+                  <span aria-hidden="true">−</span>
+                </button>
+                <div class="faq-panel">
+                  不会。Write First 只显示只读翻译卡片，不会改写你的输入框内容，也不会替你提交或发送。
+                </div>
+              </article>
+              <article class="faq-item">
+                <button class="faq-trigger" type="button" aria-expanded="false">
+                  <span>它会影响我原来在网页上的输入节奏吗？</span>
+                  <span aria-hidden="true">+</span>
+                </button>
+                <div class="faq-panel" hidden>
+                  不会。它不会抢焦点、不会阻止回车、不会拦截键盘事件。继续输入时旧卡片会立刻隐藏，页面原有行为保持不变。
+                </div>
+              </article>
+              <article class="faq-item">
+                <button class="faq-trigger" type="button" aria-expanded="false">
+                  <span>文本会被保存成学习历史吗？</span>
+                  <span aria-hidden="true">+</span>
+                </button>
+                <div class="faq-panel" hidden>
+                  不会。MVP 只保存扩展设置，不保存用户输入历史或翻译历史。当前文本只会发送到用户自行配置的 OpenAI-compatible 接口。
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="cta-band">
+            <div class="stack-16">
+              <p class="eyebrow">开始使用</p>
+              <h2>先把扩展装进浏览器，再在真实输入中体验这条旁注。</h2>
+              <p>
+                安装页包含下载、Chrome 加载步骤与基础配置说明。第一次设置完成后，就可以直接在常见网页输入框里测试。
+              </p>
+            </div>
+            <a class="button button--primary" href="/install/">前往安装页</a>
+          </div>
+        </section>
+      </main>
+    </div>
   </body>
 </html>
