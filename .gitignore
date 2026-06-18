@@ -2,5 +2,7 @@ node_modules/
 dist/
 apps/web/dist/
 *.log
+.od-skills/
+*.artifact.json
 
 .vercel
