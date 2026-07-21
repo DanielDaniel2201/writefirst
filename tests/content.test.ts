@@ -77,6 +77,10 @@ describe("content script", () => {
     const host = document.getElementById("write-first-translation-card-host") as HTMLDivElement;
     expect(host.hidden).toBe(false);
     expect(host.shadowRoot?.textContent).toContain("Hello");
+    expect(sendMessage).toHaveBeenCalledWith({
+      type: "RECORD_EXCERPT",
+      text: "你好"
+    });
   });
 
   it("uses the current selection to translate rich ARIA textbox editors", async () => {
@@ -132,6 +136,70 @@ describe("content script", () => {
       sourceLanguage: "Chinese",
       targetLanguage: "English"
     });
+  });
+
+  it("does not record a translation response invalidated by continued typing", async () => {
+    let resolveTranslation: (value: { ok: true; translation: string }) => void = () => {};
+    const translationResponse = new Promise<{ ok: true; translation: string }>((resolve) => {
+      resolveTranslation = resolve;
+    });
+    const sendMessage = vi.fn().mockImplementation((message: { type: string }) => {
+      if (message.type === "TRANSLATE_TEXT") {
+        return translationResponse;
+      }
+
+      return Promise.resolve({ ok: true });
+    });
+
+    vi.stubGlobal("chrome", {
+      runtime: { sendMessage },
+      storage: {
+        sync: {
+          get: vi.fn().mockResolvedValue(DEFAULT_SETTINGS),
+          set: vi.fn()
+        },
+        onChanged: { addListener: vi.fn() }
+      }
+    });
+
+    await import("../src/content");
+    await Promise.resolve();
+    await Promise.resolve();
+
+    document.body.innerHTML = '<textarea id="composer"></textarea>';
+    const composer = document.getElementById("composer") as HTMLTextAreaElement;
+    composer.getBoundingClientRect = () =>
+      ({
+        bottom: 80,
+        height: 44,
+        left: 20,
+        right: 520,
+        top: 36,
+        width: 500,
+        x: 20,
+        y: 36,
+        toJSON: () => ({})
+      }) as DOMRect;
+
+    composer.focus();
+    composer.dispatchEvent(new FocusEvent("focusin", { bubbles: true }));
+    composer.value = "你好";
+    composer.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: "好" }));
+    await vi.advanceTimersByTimeAsync(800);
+
+    composer.value = "你好呀";
+    composer.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: "呀" }));
+    resolveTranslation({ ok: true, translation: "Hello" });
+    await Promise.resolve();
+    await Promise.resolve();
+
+    const host = document.getElementById("write-first-translation-card-host") as HTMLDivElement;
+    expect(host.hidden).toBe(true);
+    expect(
+      sendMessage.mock.calls.some(
+        ([message]) => message.type === "RECORD_EXCERPT" && message.text === "你好"
+      )
+    ).toBe(false);
   });
 
   it("hides a loading card when a rich editor is cleared before translation returns", async () => {
@@ -199,6 +267,7 @@ describe("content script", () => {
     await Promise.resolve();
 
     expect(host.hidden).toBe(true);
+    expect(sendMessage.mock.calls.some(([message]) => message.type === "RECORD_EXCERPT")).toBe(false);
   });
 
   it("does not retranslate unchanged text when only the selection changes", async () => {
@@ -249,7 +318,7 @@ describe("content script", () => {
     await vi.advanceTimersByTimeAsync(800);
     await Promise.resolve();
 
-    expect(sendMessage).toHaveBeenCalledTimes(1);
+    expect(countMessages(sendMessage, "TRANSLATE_TEXT")).toBe(1);
 
     range.setStart(childText, 0);
     range.setEnd(childText, 5);
@@ -260,7 +329,7 @@ describe("content script", () => {
 
     await vi.advanceTimersByTimeAsync(1600);
 
-    expect(sendMessage).toHaveBeenCalledTimes(1);
+    expect(countMessages(sendMessage, "TRANSLATE_TEXT")).toBe(1);
   });
 
   it("hides the card when a Twitter post button inside the composer is clicked", async () => {
@@ -430,7 +499,7 @@ describe("content script", () => {
 
     const host = document.getElementById("write-first-translation-card-host") as HTMLDivElement;
     expect(host.hidden).toBe(false);
-    expect(sendMessage).toHaveBeenCalledTimes(1);
+    expect(countMessages(sendMessage, "TRANSLATE_TEXT")).toBe(1);
 
     const button = document.querySelector("[data-testid='tweetButtonInline']") as HTMLButtonElement;
     button.dispatchEvent(new Event("click", { bubbles: true }));
@@ -444,7 +513,7 @@ describe("content script", () => {
     await vi.advanceTimersByTimeAsync(800);
     await Promise.resolve();
 
-    expect(sendMessage).toHaveBeenCalledTimes(1);
+    expect(countMessages(sendMessage, "TRANSLATE_TEXT")).toBe(1);
     expect(host.hidden).toBe(true);
   });
 
@@ -507,3 +576,7 @@ describe("content script", () => {
     expect(host.hidden).toBe(true);
   });
 });
+
+function countMessages(sendMessage: ReturnType<typeof vi.fn>, type: string): number {
+  return sendMessage.mock.calls.filter(([message]) => message.type === type).length;
+}

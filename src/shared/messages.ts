@@ -5,7 +5,12 @@ export interface TranslateTextMessage {
   targetLanguage: string;
 }
 
-export type RuntimeMessage = TranslateTextMessage;
+export interface RecordExcerptMessage {
+  type: "RECORD_EXCERPT";
+  text: string;
+}
+
+export type RuntimeMessage = TranslateTextMessage | RecordExcerptMessage;
 
 export type TranslateTextResponse =
   | {
@@ -16,3 +21,14 @@ export type TranslateTextResponse =
       ok: false;
       error: string;
     };
+
+export type RecordExcerptResponse =
+  | {
+      ok: true;
+    }
+  | {
+      ok: false;
+      error: string;
+    };
+
+export type RuntimeResponse = TranslateTextResponse | RecordExcerptResponse;

@@ -10,7 +10,7 @@ A Chrome Manifest V3 extension for language learning while writing. When a user 
 - Shows only the translated text in a passive card.
 - Hides the card when the user keeps typing, clears the text, leaves the field, disables the extension, or the field disappears.
 - Skips sensitive fields such as password, email, phone, URL, numeric, OTP, and payment-like fields.
-- Stores only settings, not input history or translation history.
+- Stores settings plus a local timestamped collection of the original text sent for translation; translated results are not stored.
 
 ## Setup
 
@@ -27,7 +27,7 @@ D:\projects\write-first\dist
 
 ## Configure
 
-Open the extension popup and set:
+Click the extension icon to open the full-page Write First workspace, then open Settings and set:
 
 - Enabled
 - Native language

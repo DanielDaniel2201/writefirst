@@ -1,15 +1,29 @@
 import { translateWithOpenAICompatible } from "./background/openaiCompatible";
-import type { RuntimeMessage, TranslateTextResponse } from "./shared/messages";
+import { addExcerpt } from "./shared/excerpts";
+import type { RuntimeMessage, RuntimeResponse, TranslateTextMessage } from "./shared/messages";
 import { getSettings } from "./shared/settings";
+
+void chrome.storage.local.setAccessLevel({ accessLevel: "TRUSTED_CONTEXTS" });
+
+chrome.action.onClicked.addListener(() => {
+  void chrome.runtime.openOptionsPage();
+});
 
 chrome.runtime.onMessage.addListener(
   (
     message: RuntimeMessage,
     _sender: chrome.runtime.MessageSender,
-    sendResponse: (response: TranslateTextResponse) => void
+    sendResponse: (response: RuntimeResponse) => void
   ) => {
-    if (message.type !== "TRANSLATE_TEXT") {
-      return false;
+    if (message.type === "RECORD_EXCERPT") {
+      void addExcerpt(message.text)
+        .then(() => sendResponse({ ok: true }))
+        .catch((error: unknown) => {
+          const message = error instanceof Error ? error.message : "Could not save excerpt.";
+          sendResponse({ ok: false, error: message });
+        });
+
+      return true;
     }
 
     void handleTranslate(message)
@@ -23,7 +37,7 @@ chrome.runtime.onMessage.addListener(
   }
 );
 
-async function handleTranslate(message: RuntimeMessage): Promise<string> {
+async function handleTranslate(message: TranslateTextMessage): Promise<string> {
   const settings = await getSettings();
 
   if (!settings.enabled) {

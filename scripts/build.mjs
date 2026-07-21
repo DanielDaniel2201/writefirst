@@ -13,7 +13,7 @@ await build({
   entryPoints: {
     background: join(root, "src/background.ts"),
     content: join(root, "src/content.ts"),
-    popup: join(root, "src/popup.ts")
+    options: join(root, "src/options.ts")
   },
   bundle: true,
   outdir: dist,
@@ -24,7 +24,7 @@ await build({
   logLevel: "info"
 });
 
-for (const fileName of ["manifest.json", "popup.html", "popup.css"]) {
+for (const fileName of ["manifest.json", "options.html", "options.css"]) {
   const source = await readFile(join(root, "src", fileName), "utf8");
   await writeFile(join(dist, fileName), source);
 }

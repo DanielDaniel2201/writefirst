@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Write First</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="#excerpts" aria-label="Write First 首页">
+          <span class="brand__mark">W</span>
+          <span>Write First</span>
+        </a>
+
+        <nav class="nav" aria-label="功能导航">
+          <button class="nav__item is-active" type="button" data-view="excerpts" aria-current="page">
+            <span aria-hidden="true">✦</span>
+            怎么说
+          </button>
+          <button class="nav__item" type="button" data-view="settings">
+            <span aria-hidden="true">⚙</span>
+            设置
+          </button>
+        </nav>
+      </aside>
+
+      <main class="workspace">
+        <section id="excerpts-view" class="view" data-panel="excerpts">
+          <header class="page-header">
+            <div>
+              <h1>怎么说</h1>
+              <p class="page-description">每次触发翻译时，原始母语文本会按时间记录在这里。</p>
+            </div>
+            <p class="excerpt-count" aria-live="polite"><strong id="excerpt-count">0</strong> 条摘录</p>
+          </header>
+
+          <div id="excerpt-table" class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">时间</th>
+                  <th scope="col">原文</th>
+                </tr>
+              </thead>
+              <tbody id="excerpt-list"></tbody>
+            </table>
+          </div>
+
+          <nav id="pagination" class="pagination" aria-label="摘录分页" hidden></nav>
+
+          <div id="empty-state" class="empty-state">
+            <div class="empty-state__mark" aria-hidden="true">文</div>
+            <h2>还没有摘录</h2>
+            <p>在网页输入框中写下内容并触发一次翻译，原文就会出现在这里。</p>
+          </div>
+        </section>
+
+        <section id="settings-view" class="view" data-panel="settings" hidden>
+          <header class="page-header">
+            <div>
+              <h1>设置</h1>
+              <p class="page-description">配置翻译语言、触发速度和你自己的翻译服务。</p>
+            </div>
+            <label class="switch">
+              <input id="enabled" type="checkbox" />
+              <span class="switch__track" aria-hidden="true"></span>
+              <span>启用插件</span>
+            </label>
+          </header>
+
+          <form id="settings-form" class="settings-form">
+            <section class="settings-group" aria-labelledby="language-settings-title">
+              <h2 id="language-settings-title">语言与触发</h2>
+
+              <div class="settings-group__body">
+                <div class="form-grid">
+                  <label>
+                    母语
+                    <input id="sourceLanguage" name="sourceLanguage" autocomplete="off" />
+                  </label>
+
+                  <label>
+                    目标语言
+                    <input id="targetLanguage" name="targetLanguage" autocomplete="off" />
+                  </label>
+                </div>
+
+                <label class="range-field">
+                  <span class="range-field__header">
+                    翻译等待时间
+                    <output id="idleDelayValue" for="idleDelay">0.8 秒</output>
+                  </span>
+                  <input id="idleDelay" name="idleDelay" type="range" min="800" max="1500" step="100" />
+                  <span class="range-field__scale" aria-hidden="true">
+                    <span>0.8 秒</span>
+                    <span>1.5 秒</span>
+                  </span>
+                </label>
+              </div>
+            </section>
+
+            <section class="settings-group" aria-labelledby="llm-settings-title">
+              <h2 id="llm-settings-title">大模型配置</h2>
+
+              <div class="settings-group__body">
+                <label>
+                  API 地址
+                  <input id="baseUrl" name="baseUrl" inputmode="url" autocomplete="off" />
+                </label>
+
+                <div class="form-grid">
+                  <label>
+                    模型
+                    <input id="model" name="model" autocomplete="off" />
+                  </label>
+
+                  <label>
+                    API Key
+                    <input id="apiKey" name="apiKey" type="password" autocomplete="off" />
+                  </label>
+                </div>
+
+                <label class="checkbox-field">
+                  <input id="thinkingEnabled" name="thinkingEnabled" type="checkbox" />
+                  <span>启用思考模式</span>
+                </label>
+              </div>
+            </section>
+
+            <div class="form-actions">
+              <p id="status" role="status" aria-live="polite"></p>
+              <button class="primary-button" type="submit">保存设置</button>
+            </div>
+          </form>
+        </section>
+      </main>
+    </div>
+
+    <script src="options.js"></script>
+  </body>
+</html>

@@ -6,8 +6,11 @@
   "permissions": ["storage"],
   "host_permissions": ["<all_urls>"],
   "action": {
-    "default_title": "Write First",
-    "default_popup": "popup.html"
+    "default_title": "Open Write First"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
   },
   "background": {
     "service_worker": "background.js"

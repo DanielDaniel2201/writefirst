@@ -327,6 +327,18 @@ async function requestTranslation(element: EditableElement, text: string): Promi
   lastCompletedText = text;
   lastCompletedElement = element;
   card.show(element, response.translation);
+  void recordExcerpt(text);
+}
+
+async function recordExcerpt(text: string): Promise<void> {
+  try {
+    await chrome.runtime.sendMessage({
+      type: "RECORD_EXCERPT",
+      text
+    });
+  } catch {
+    // Saving an excerpt must not hide a translation the user already received.
+  }
 }
 
 function resolveEventEditableTarget(target: EventTarget | null): EditableElement | null {
