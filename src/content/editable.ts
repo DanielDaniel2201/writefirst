@@ -97,7 +97,7 @@ export function getEditableText(element: EditableElement): string {
     return element.value;
   }
 
-  return withoutPlaceholderText(element, element.innerText || element.textContent || "").trim();
+  return getContentEditableText(element).trim();
 }
 
 export function hasMinimumVisibleChars(text: string, minChars: number): boolean {
@@ -146,14 +146,47 @@ function isAriaDisabledOrReadonly(element: HTMLElement): boolean {
   return element.getAttribute("aria-disabled") === "true" || element.getAttribute("aria-readonly") === "true";
 }
 
-function withoutPlaceholderText(element: HTMLElement, text: string): string {
-  const placeholder = [
+function getContentEditableText(element: HTMLElement): string {
+  const text = readElementText(element);
+  const rootPlaceholders = getPlaceholderValues(element);
+
+  if (rootPlaceholders.some((placeholder) => text.trim() === placeholder)) {
+    return "";
+  }
+
+  const clone = element.cloneNode(true) as HTMLElement;
+  const placeholderNodes = Array.from(
+    clone.querySelectorAll<HTMLElement>("[aria-placeholder], [data-placeholder], [placeholder]")
+  );
+
+  for (const node of placeholderNodes) {
+    const nodeText = readElementText(node).trim();
+    const placeholderValues = [...getPlaceholderValues(node), ...rootPlaceholders];
+
+    if (
+      nodeText &&
+      (placeholderValues.includes(nodeText) ||
+        (node.hasAttribute("data-placeholder") && !node.getAttribute("data-placeholder")?.trim()))
+    ) {
+      node.remove();
+    }
+  }
+
+  return readElementText(clone);
+}
+
+function getPlaceholderValues(element: HTMLElement): string[] {
+  return [
     element.getAttribute("aria-placeholder"),
     element.getAttribute("data-placeholder"),
     element.getAttribute("placeholder")
-  ].find((value) => value?.trim());
+  ]
+    .map((value) => value?.trim())
+    .filter((value): value is string => Boolean(value));
+}
 
-  return placeholder && text.trim() === placeholder.trim() ? "" : text;
+function readElementText(element: HTMLElement): string {
+  return element.innerText || element.textContent || "";
 }
 
 function hasSensitiveHints(element: HTMLElement): boolean {

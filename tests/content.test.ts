@@ -138,6 +138,42 @@ describe("content script", () => {
     });
   });
 
+  it("does not translate nested placeholder text in rich editors", async () => {
+    const sendMessage = vi.fn();
+    vi.stubGlobal("chrome", {
+      runtime: { sendMessage },
+      storage: {
+        sync: {
+          get: vi.fn().mockResolvedValue(DEFAULT_SETTINGS),
+          set: vi.fn()
+        },
+        onChanged: { addListener: vi.fn() }
+      }
+    });
+
+    await import("../src/content");
+    await Promise.resolve();
+    await Promise.resolve();
+
+    document.body.innerHTML = `
+      <div id="composer" role="textbox" aria-placeholder="What is happening?">
+        <span data-placeholder="What is happening?">What is happening?</span>
+      </div>
+    `;
+
+    const childText = document.querySelector("[data-placeholder]")?.firstChild as Text;
+    const range = document.createRange();
+    range.setStart(childText, childText.length);
+    range.collapse(true);
+    document.getSelection()?.removeAllRanges();
+    document.getSelection()?.addRange(range);
+    document.dispatchEvent(new Event("selectionchange"));
+
+    await vi.advanceTimersByTimeAsync(800);
+
+    expect(sendMessage).not.toHaveBeenCalled();
+  });
+
   it("does not record a translation response invalidated by continued typing", async () => {
     let resolveTranslation: (value: { ok: true; translation: string }) => void = () => {};
     const translationResponse = new Promise<{ ok: true; translation: string }>((resolve) => {

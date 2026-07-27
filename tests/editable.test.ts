@@ -108,6 +108,41 @@ describe("editable rules", () => {
     expect(getEditableText(composer)).toBe("");
   });
 
+  it("does not treat nested placeholder nodes as user text", () => {
+    document.body.innerHTML = `
+      <div id="composer" role="textbox" aria-placeholder="What is happening?">
+        <span data-placeholder="What is happening?">What is happening?</span>
+      </div>
+    `;
+
+    const composer = document.getElementById("composer") as HTMLElement;
+
+    expect(getEditableText(composer)).toBe("");
+  });
+
+  it("keeps user text while excluding a nested placeholder node", () => {
+    document.body.innerHTML = `
+      <div id="composer" role="textbox" aria-placeholder="What is happening?">
+        <span data-placeholder="What is happening?">What is happening?</span>
+        <span>你好</span>
+      </div>
+    `;
+
+    const composer = document.getElementById("composer") as HTMLElement;
+
+    expect(getEditableText(composer)).toBe("你好");
+  });
+
+  it("reads only values from native fields with placeholders", () => {
+    document.body.innerHTML = `
+      <input id="input" type="text" placeholder="Search here" />
+      <textarea id="textarea" placeholder="Write here"></textarea>
+    `;
+
+    expect(getEditableText(document.getElementById("input") as HTMLInputElement)).toBe("");
+    expect(getEditableText(document.getElementById("textarea") as HTMLTextAreaElement)).toBe("");
+  });
+
   it("extracts input and contenteditable text", () => {
     document.body.innerHTML = `
       <input id="input" type="text" />
