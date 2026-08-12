@@ -1,27 +1,22 @@
 :root {
   color-scheme: light;
 
-  --color-bg: #f8f9f6;
-  --color-surface: #ffffff;
-  --color-text: #29434d;
-  --color-muted: #788b92;
-  --color-muted-light: #9aa9aa;
-  --color-border: #e0e6e4;
-  --color-accent: #88a195;
+  --paper: #f7f6f1;
+  --paper-glow: #fbfaf6;
+  --ink: #0b0d0c;
+  --muted: #6d6f6c;
+  --green: #0d4f2e;
+  --green-dark: #083a22;
+  --line: #d6d6d0;
+  --card: rgba(255, 255, 255, 0.9);
+  --font:
+    Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Microsoft YaHei", sans-serif;
 
-  --font-display:
-    "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
-  --font-ui:
-    "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
-
-  --shadow-frame: 0 24px 60px rgba(42, 64, 70, 0.045);
-  --focus-ring: 0 0 0 3px rgba(136, 161, 149, 0.25);
-
-  background: var(--color-bg);
-  color: var(--color-text);
-  font-family: var(--font-ui);
-  font-size: 16px;
-  line-height: 1.5;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font);
+  font-synthesis: none;
   text-rendering: optimizeLegibility;
 }
 
@@ -31,18 +26,16 @@
   box-sizing: border-box;
 }
 
-html {
-  min-width: 320px;
-  min-height: 100%;
-  scroll-behavior: smooth;
-}
-
+html,
 body {
   min-width: 320px;
   min-height: 100%;
   margin: 0;
-  background: var(--color-bg);
-  color: var(--color-text);
+}
+
+body {
+  background:
+    radial-gradient(circle at 50% 42%, var(--paper-glow) 0, var(--paper) 58%, #f3f2ec 100%);
 }
 
 button,
