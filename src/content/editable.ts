@@ -156,7 +156,9 @@ function getContentEditableText(element: HTMLElement): string {
 
   const clone = element.cloneNode(true) as HTMLElement;
   const placeholderNodes = Array.from(
-    clone.querySelectorAll<HTMLElement>("[aria-placeholder], [data-placeholder], [placeholder]")
+    clone.querySelectorAll<HTMLElement>(
+      "[aria-placeholder], [data-placeholder], [placeholder], [contenteditable='false']"
+    )
   );
 
   for (const node of placeholderNodes) {
@@ -166,7 +168,8 @@ function getContentEditableText(element: HTMLElement): string {
     if (
       nodeText &&
       (placeholderValues.includes(nodeText) ||
-        (node.hasAttribute("data-placeholder") && !node.getAttribute("data-placeholder")?.trim()))
+        (node.hasAttribute("data-placeholder") && !node.getAttribute("data-placeholder")?.trim()) ||
+        hasPlaceholderClass(node))
     ) {
       node.remove();
     }
@@ -186,7 +189,14 @@ function getPlaceholderValues(element: HTMLElement): string[] {
 }
 
 function readElementText(element: HTMLElement): string {
-  return element.innerText || element.textContent || "";
+  return (element.innerText || element.textContent || "").replace(/[\u200B\uFEFF]/g, "");
+}
+
+function hasPlaceholderClass(element: HTMLElement): boolean {
+  return (
+    Array.from(element.classList).some((className) => className.toLowerCase().includes("placeholder")) ||
+    Boolean(element.querySelector("[class*='placeholder']"))
+  );
 }
 
 function hasSensitiveHints(element: HTMLElement): boolean {

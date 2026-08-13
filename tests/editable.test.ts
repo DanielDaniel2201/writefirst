@@ -120,6 +120,26 @@ describe("editable rules", () => {
     expect(getEditableText(composer)).toBe("");
   });
 
+  it("does not treat Feishu Slate placeholder nodes or editor fillers as user text", () => {
+    document.body.innerHTML = `
+      <div contenteditable="true" data-slate-editor="true">
+        <div data-node="true"><div data-line-wrapper="true">
+          <span data-void="true" contenteditable="false">
+            <span class="editor__custom--placeholder">
+              <span class="editor__custom--placeholder-content">可以向自己发送文件或转发消息</span>
+            </span>
+          </span>
+          <span data-leaf="true"><span data-string="true" data-enter="true">\u200B</span></span>
+          <span data-zero-space="true">\u200B</span>
+        </div></div>
+      </div>
+    `;
+
+    const composer = document.querySelector("[data-slate-editor]") as HTMLElement;
+
+    expect(getEditableText(composer)).toBe("");
+  });
+
   it("keeps user text while excluding a nested placeholder node", () => {
     document.body.innerHTML = `
       <div id="composer" role="textbox" aria-placeholder="What is happening?">

@@ -135,7 +135,8 @@ a {
 
 .translation-card {
   display: flex;
-  width: min(61%, 620px);
+  width: max-content;
+  max-width: 100%;
   min-height: clamp(88px, 12vh, 120px);
   align-items: center;
   margin-top: 8px;
@@ -157,8 +158,7 @@ a {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: auto;
-  padding-top: clamp(58px, 9vh, 104px);
+  margin-top: clamp(28px, 4.5vh, 44px);
 }
 
 .download-button {
@@ -238,10 +238,6 @@ body[data-locale="zh"] .translation-card {
   .hero-title-line {
     flex-wrap: wrap;
   }
-
-  .translation-card {
-    width: min(76%, 620px);
-  }
 }
 
 @media (max-width: 640px) {
@@ -307,7 +303,6 @@ body[data-locale="zh"] .translation-card {
   }
 
   .translation-card {
-    width: min(92%, 440px);
     min-height: 82px;
     margin-top: 7px;
     padding: 20px 24px;
@@ -316,7 +311,7 @@ body[data-locale="zh"] .translation-card {
 
   .install-block {
     width: 100%;
-    padding-top: clamp(56px, 10vh, 92px);
+    margin-top: 28px;
   }
 
   .download-button {
@@ -340,7 +335,7 @@ body[data-locale="zh"] .translation-card {
   }
 
   .install-block {
-    padding-top: 42px;
+    margin-top: 24px;
   }
 
   .download-button {

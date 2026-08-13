@@ -174,6 +174,50 @@ describe("content script", () => {
     expect(sendMessage).not.toHaveBeenCalled();
   });
 
+  it("does not translate the Feishu chat composer placeholder", async () => {
+    const sendMessage = vi.fn();
+    vi.stubGlobal("chrome", {
+      runtime: { sendMessage },
+      storage: {
+        sync: {
+          get: vi.fn().mockResolvedValue(DEFAULT_SETTINGS),
+          set: vi.fn()
+        },
+        onChanged: { addListener: vi.fn() }
+      }
+    });
+
+    await import("../src/content");
+    await Promise.resolve();
+    await Promise.resolve();
+
+    document.body.innerHTML = `
+      <div id="composer" contenteditable="true" data-slate-editor="true">
+        <div data-node="true"><div data-line-wrapper="true">
+          <span data-void="true" contenteditable="false">
+            <span class="editor__custom--placeholder">
+              <span class="editor__custom--placeholder-content">可以向自己发送文件或转发消息</span>
+            </span>
+          </span>
+          <span data-leaf="true"><span data-string="true" data-enter="true">\u200B</span></span>
+          <span data-zero-space="true">\u200B</span>
+        </div></div>
+      </div>
+    `;
+
+    const placeholderText = document.querySelector(".editor__custom--placeholder-content")?.firstChild as Text;
+    const range = document.createRange();
+    range.setStart(placeholderText, placeholderText.length);
+    range.collapse(true);
+    document.getSelection()?.removeAllRanges();
+    document.getSelection()?.addRange(range);
+    document.dispatchEvent(new Event("selectionchange"));
+
+    await vi.advanceTimersByTimeAsync(800);
+
+    expect(sendMessage).not.toHaveBeenCalled();
+  });
+
   it("does not record a translation response invalidated by continued typing", async () => {
     let resolveTranslation: (value: { ok: true; translation: string }) => void = () => {};
     const translationResponse = new Promise<{ ok: true; translation: string }>((resolve) => {
